@@ -59,7 +59,8 @@
             });
 
             utterance.onend = () => {
-                playPauseBtn.textContent = 'Replay Audio';
+                // For the blind user flow, automatically return to the scanner.
+                window.location.href = "{% url 'scan_beacon' %}";
             };
 
         } else {

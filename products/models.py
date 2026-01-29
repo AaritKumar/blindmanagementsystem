@@ -2,6 +2,7 @@ import qrcode
 from io import BytesIO
 from django.core.files import File
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils.text import slugify
 import shortuuid
 
@@ -11,10 +12,33 @@ import shortuuid
 # The QR code image is generated and saved programmatically upon saving a QRCode instance,
 # ensuring data integrity and automating a core business process.
 
+class Template(models.Model):
+    """
+    Represents a pre-defined template for product descriptions.
+    """
+    name = models.CharField(max_length=100)
+    content = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+class Folder(models.Model):
+    """
+    Represents a folder to organize products.
+    """
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='folders')
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
 class Product(models.Model):
     """
     Represents a product with its audio description.
     """
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='products')
+    folder = models.ForeignKey(Folder, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     name = models.CharField(max_length=200, help_text="A name for your product for easy identification.")
     text_description = models.TextField(help_text="The full text description that will be read aloud.")
     created_at = models.DateTimeField(auto_now_add=True)

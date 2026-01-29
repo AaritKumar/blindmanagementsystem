@@ -83,9 +83,15 @@
     <div class="container">
         <header role="banner">
             <nav role="navigation">
-                <a href="{% url 'home' %}">Home</a>
-                <a href="{% url 'dashboard' %}">Dashboard</a>
-                <a href="{% url 'scan_beacon' %}">Scan Mode</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-link">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'home' %}">Home</a>
+                {% endif %}
             </nav>
         </header>
         <main id="main-content" role="main">
@@ -93,5 +99,21 @@
             {% endblock %}
         </main>
     </div>
+    <style>
+    .btn-link {
+        background: none;
+        border: none;
+        color: #005fcc;
+        text-decoration: none;
+        font-weight: bold;
+        font-family: sans-serif;
+        font-size: 1em;
+        padding: 0;
+        cursor: pointer;
+    }
+    .btn-link:hover {
+        text-decoration: underline;
+    }
+    </style>
 </body>
 </html>

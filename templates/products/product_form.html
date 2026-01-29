@@ -1,12 +1,49 @@
-{% extends 'base.html' %}
+<h2>Create New Audio Label</h2>
 
-{% block title %}Create Product Audio{% endblock %}
+<div class="tabs">
+    <button class="tab-link active" onclick="openCreateTab('custom')">Custom</button>
+    <button class="tab-link" onclick="openCreateTab('template')">Template</button>
+</div>
 
-{% block content %}
-  <h2>Create New Product Audio Description</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn">Save and Generate QR Code</button>
-  </form>
-{% endblock %}
+<div id="custom" class="create-tab-content active">
+    <form method="post" action="{% url 'product_create' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_name">Name:</label>
+            <input type="text" name="name" id="id_name" required>
+        </div>
+        <div class="form-group">
+            <label for="id_text_description">Description:</label>
+            <textarea name="text_description" id="id_text_description" required></textarea>
+        </div>
+        <button type="button" id="preview-btn" class="btn">Preview Audio</button>
+        <button type="submit" class="btn">Create</button>
+    </form>
+</div>
+
+<div id="template" class="create-tab-content">
+    <p>This section is under development. Templates will be available soon.</p>
+</div>
+
+<script>
+    document.getElementById('preview-btn').addEventListener('click', () => {
+        const text = document.getElementById('id_text_description').value;
+        if (text && 'speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.8;
+            window.speechSynthesis.speak(utterance);
+        }
+    });
+
+    function openCreateTab(tabName) {
+        var i;
+        var tabcontent = document.getElementsByClassName("create-tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        var tablinks = document.getElementsByClassName("tab-link");
+        // This is a simplified version, you might need to adjust based on your main tab script
+        document.getElementById(tabName).style.display = "block";
+    }
+</script>
+

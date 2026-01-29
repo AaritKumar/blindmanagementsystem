@@ -3,7 +3,35 @@
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
-  <h1>Welcome to Accessible QR Audio</h1>
-  <p>This service helps businesses make their product information accessible to everyone.</p>
-  <a href="{% url 'dashboard' %}" class="btn">Get Started</a>
+<style>
+    .choice-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 50px;
+    }
+    .choice-btn {
+        font-size: 2em;
+        padding: 40px 60px;
+        text-decoration: none;
+        border: 2px solid #005fcc;
+        border-radius: 10px;
+        color: #005fcc;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    .choice-btn:hover {
+        background-color: #005fcc;
+        color: #fff;
+    }
+</style>
+
+<div style="text-align: center;">
+    <h1>Welcome to Accessible QR Audio</h1>
+    <p>Please select your user type.</p>
+    <div class="choice-container">
+        <a href="{% url 'scan_beacon' %}" class="choice-btn">Blind</a>
+        <a href="{% url 'login' %}" class="choice-btn">Business</a>
+    </div>
+</div>
 {% endblock %}
+
