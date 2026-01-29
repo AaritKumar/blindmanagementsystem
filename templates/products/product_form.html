@@ -42,7 +42,15 @@
 </div>
 
 <div id="template" class="create-tab-content">
-    <p>This section is under development. Templates will be available soon.</p>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <input type="text" id="template-search" class="form-group" placeholder="Search templates..." style="width: calc(100% - 80px); margin: 0;">
+        <button id="template-fab" class="btn">+</button>
+    </div>
+    <ul id="template-list" style="list-style: none; padding: 0;">
+        {% for template in templates %}
+            <li><a href="{% url 'use_template' template.pk %}">{{ template.name }}</a></li>
+        {% endfor %}
+    </ul>
 </div>
 
 <script>

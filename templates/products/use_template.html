@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Create from Template: {{ template.name }}</h2>
+<form method="post" action="{% url 'product_create' %}">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="id_name">Name:</label>
+        <input type="text" name="name" id="id_name" value="{{ template.name }}" required>
+    </div>
+    
+    <div id="template-form-container" class="form-group">
+        <!-- Dynamic form fields will be generated here -->
+    </div>
+    
+    <textarea name="text_description" id="id_text_description" style="display:none;"></textarea>
+    
+    <div class="form-group">
+        <button type="button" id="preview-btn" class="btn">Preview Audio</button>
+        <button type="submit" class="btn">Create</button>
+    </div>
+</form>
+
+<script>
+    const templateContent = "{{ template.content|escapejs }}";
+    const container = document.getElementById('template-form-container');
+    const finalDescription = document.getElementById('id_text_description');
+    
+    const parts = templateContent.split(/(\[blank\]\[.*?\])/g);
+    
+    parts.forEach(part => {
+        const match = /\[blank\]\[(.*?)\]/.exec(part);
+        if (match) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = match[1];
+            input.className = 'template-input';
+            container.appendChild(input);
+        } else {
+            const span = document.createElement('span');
+            span.textContent = part;
+            container.appendChild(span);
+        }
+    });
+
+    function updateFinalDescription() {
+        let fullText = '';
+        container.childNodes.forEach(node => {
+            if (node.tagName === 'INPUT') {
+                fullText += node.value;
+            } else if (node.tagName === 'SPAN') {
+                fullText += node.textContent;
+            }
+        });
+        finalDescription.value = fullText;
+    }
+    
+    container.addEventListener('input', updateFinalDescription);
+
+    document.getElementById('preview-btn').addEventListener('click', () => {
+        updateFinalDescription();
+        const text = finalDescription.value;
+        if (text && 'speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.8;
+            window.speechSynthesis.speak(utterance);
+        }
+    });
+</script>
+{% endblock %}

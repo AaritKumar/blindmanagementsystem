@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, QRCode
+from .models import Product, QRCode, Folder, Template
 
 # Architectural Decision:
 # The Django admin is a powerful tool for internal data management. By registering the models,
@@ -7,9 +7,6 @@ from .models import Product, QRCode
 # of QR codes directly within the product admin page, which is a more intuitive workflow.
 
 class QRCodeInline(admin.StackedInline):
-    """
-    Allows editing of the QRCode directly from the Product admin page.
-    """
     model = QRCode
     can_delete = False
     verbose_name_plural = 'QR Code'
@@ -25,20 +22,14 @@ class QRCodeInline(admin.StackedInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    """
-    Customizes the admin interface for the Product model.
-    """
-    list_display = ('name', 'created_at')
+    list_display = ('name', 'owner', 'folder', 'created_at')
     search_fields = ('name', 'text_description')
-    list_filter = ('created_at',)
+    list_filter = ('created_at', 'owner', 'folder')
     inlines = (QRCodeInline,)
     readonly_fields = ('unique_slug',)
 
 @admin.register(QRCode)
 class QRCodeAdmin(admin.ModelAdmin):
-    """
-    Customizes the admin interface for the QRCode model.
-    """
     list_display = ('linked_product', 'public_url')
     readonly_fields = ('image_tag',)
 
@@ -48,3 +39,14 @@ class QRCodeAdmin(admin.ModelAdmin):
             return mark_safe(f'<img src="{instance.image.url}" width="150" height="150" />')
         return ""
     image_tag.short_description = 'QR Code Image'
+
+@admin.register(Folder)
+class FolderAdmin(admin.ModelAdmin):
+    list_display = ('name', 'owner')
+    search_fields = ('name',)
+    list_filter = ('owner',)
+
+@admin.register(Template)
+class TemplateAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name', 'content')

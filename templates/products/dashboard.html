@@ -180,8 +180,8 @@
 </style>
 
 <div class="tabs">
-    <button class="tab-link active" onclick="openTab('catalog')">Catalog</button>
-    <button class="tab-link" onclick="openTab('create')">Create</button>
+    <button class="tab-link active" onclick="openTab(event, 'catalog')">Catalog</button>
+    <button class="tab-link" onclick="openTab(event, 'create')">Create</button>
 </div>
 
 <div id="catalog" class="tab-content active">
@@ -274,101 +274,183 @@
     {% include 'products/product_form.html' %}
 </div>
 
+<div id="template-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Create New Template</h2>
+        <form method="post" action="{% url 'template_create' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_name">Template Name:</label>
+                <input type="text" name="name" id="id_name" required>
+            </div>
+            <div class="form-group">
+                <label for="id_content">Template Content:</label>
+                <textarea name="content" id="id_content" required placeholder="Example: Ingredients: [blank][List ingredients]"></textarea>
+            </div>
+            <button type="submit" class="btn">Create Template</button>
+        </form>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
-function openTab(tabName) {
-    var i;
-    var tabcontent = document.getElementsByClassName("tab-content");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tab-link");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        
+        // Check if evt is the element itself or an event
+        if (evt.currentTarget) {
+            evt.currentTarget.className += " active";
+        } else {
+            evt.className += " active";
+        }
     }
-    var tablinks = document.getElementsByClassName("tab-link");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
+
+    // Modal logic for folder creation
+    var modal = document.getElementById("folder-modal");
+    var btn = document.getElementById("fab");
+    var span = document.getElementsByClassName("close-button")[0];
+    btn.onclick = function() {
+      modal.style.display = "block";
     }
-    document.getElementById(tabName).style.display = "block";
-    event.currentTarget.className += " active";
-}
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
 
-// Modal logic
-var modal = document.getElementById("folder-modal");
-var btn = document.getElementById("fab");
-var span = document.getElementsByClassName("close-button")[0];
-btn.onclick = function() {
-  modal.style.display = "block";
-}
-span.onclick = function() {
-  modal.style.display = "none";
-}
-window.onclick = function(event) {
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
-}
+    // Modal logic for template creation
+    var templateModal = document.getElementById("template-modal");
+    var templateBtn = document.getElementById("template-fab");
+    if (templateBtn) {
+        var templateSpan = templateModal.getElementsByClassName("close-button")[0];
+        templateBtn.onclick = function() {
+          templateModal.style.display = "block";
+        }
+        templateSpan.onclick = function() {
+          templateModal.style.display = "none";
+        }
+    }
 
-// SortableJS logic
-document.querySelectorAll('.grid-container').forEach(grid => {
-    new Sortable(grid, {
-        group: 'shared',
-        animation: 150,
-        ghostClass: 'blue-background-class',
-        onEnd: function (evt) {
-            var itemEl = evt.item;
-            var toFolderId = evt.to.dataset.folderId;
-            var productId = itemEl.dataset.id;
-            
-            fetch("{% url 'update_product_folder' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    'product_id': productId,
-                    'folder_id': toFolderId === 'null' ? null : toFolderId
-                })
-            });
-
-            // --- FIX: Dynamically resize open folder after drop ---
-            requestAnimationFrame(() => {
-                const toGrid = evt.to;
-                if (toGrid.parentElement.classList.contains('folder-content')) {
-                    const folderContent = toGrid.parentElement;
-                    const folderHeader = folderContent.previousElementSibling;
-                    if (folderHeader.classList.contains('open')) {
-                        folderContent.style.maxHeight = folderContent.scrollHeight + "px";
-                    }
+    // Search functionality for templates
+    const searchInput = document.getElementById('template-search');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            const filter = searchInput.value.toUpperCase();
+            const templateList = document.getElementById('template-list');
+            const items = templateList.getElementsByTagName('li');
+            for (let i = 0; i < items.length; i++) {
+                let a = items[i].getElementsByTagName("a")[0];
+                let txtValue = a.textContent || a.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    items[i].style.display = "";
+                } else {
+                    items[i].style.display = "none";
                 }
-            });
-        }
-    });
-});
+            }
+        });
+    }
 
-// Preview button logic
-document.querySelectorAll('.preview-btn').forEach(button => {
-    button.addEventListener('click', event => {
-        const item = event.currentTarget.closest('.grid-item');
-        const description = item.dataset.description;
-        if (description && 'speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(description);
-            utterance.rate = 0.8;
-            window.speechSynthesis.speak(utterance);
-        }
+    window.onclick = function(event) {
+      if (event.target == modal || event.target == templateModal) {
+        modal.style.display = "none";
+        templateModal.style.display = "none";
+      }
+    }
+
+    // SortableJS logic
+    document.querySelectorAll('.grid-container').forEach(grid => {
+        new Sortable(grid, {
+            group: 'shared',
+            animation: 150,
+            ghostClass: 'blue-background-class',
+            onEnd: function (evt) {
+                var itemEl = evt.item;
+                var toFolderId = evt.to.dataset.folderId;
+                var productId = itemEl.dataset.id;
+                
+                fetch("{% url 'update_product_folder' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        'product_id': productId,
+                        'folder_id': toFolderId === 'null' ? null : toFolderId
+                    })
+                });
+
+                // --- FIX: Dynamically resize open folder after drop ---
+                requestAnimationFrame(() => {
+                    const toGrid = evt.to;
+                    if (toGrid.parentElement.classList.contains('folder-content')) {
+                        const folderContent = toGrid.parentElement;
+                        const folderHeader = folderContent.previousElementSibling;
+                        if (folderHeader.classList.contains('open')) {
+                            folderContent.style.maxHeight = folderContent.scrollHeight + "px";
+                        }
+                    }
+                });
+            }
+        });
     });
-});
+
+    // Preview button logic
+    document.querySelectorAll('.preview-btn').forEach(button => {
+        button.addEventListener('click', event => {
+            const item = event.currentTarget.closest('.grid-item');
+            const description = item.dataset.description;
+            if (description && 'speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(description);
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
+            }
+        });
+    });
 
 // Folder toggle logic with smooth animation
 document.querySelectorAll('.folder-header').forEach(header => {
-    header.addEventListener('click', () => {
-        header.classList.toggle('open');
-        const content = header.nextElementSibling;
-        if (content.style.maxHeight) {
-            content.style.maxHeight = null;
-        } else {
-            content.style.maxHeight = content.scrollHeight + "px";
-        } 
+    header.addEventListener('click', (event) => {
+        // Prevent click from bubbling to other elements if it's on the actions
+        if (!event.target.closest('.folder-actions')) {
+            header.classList.toggle('open');
+            const content = header.nextElementSibling;
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+            } 
+        }
     });
 });
+
+// Auto-switch to 'create' tab if specified in URL
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabToOpen = urlParams.get('tab');
+
+    if (tabToOpen === 'create') {
+        const createButton = Array.from(document.querySelectorAll('.tab-link')).find(el => el.textContent.trim() === 'Create');
+        if (createButton) {
+            openTab({currentTarget: createButton}, 'create');
+        }
+    } else {
+        // Ensure catalog is shown by default and correctly styled
+        document.getElementById('catalog').style.display = 'block';
+        document.getElementById('create').style.display = 'none';
+        document.querySelector('.tab-link[onclick*="catalog"]').classList.add('active');
+        document.querySelector('.tab-link[onclick*="create"]').classList.remove('active');
+    }
+});
 </script>
+
 {% endblock %}
 

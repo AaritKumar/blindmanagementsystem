@@ -24,6 +24,7 @@ class DashboardView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['folders'] = Folder.objects.filter(owner=self.request.user)
+        context['templates'] = Template.objects.all().order_by('name')
         return context
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
@@ -148,5 +149,16 @@ class FolderDeleteView(LoginRequiredMixin, DeleteView):
         # Move products to uncategorized before deleting the folder
         Product.objects.filter(folder=self.object).update(folder=None)
         return super().form_valid(form)
+
+class TemplateCreateView(LoginRequiredMixin, CreateView):
+    model = Template
+    fields = ['name', 'content']
+    
+    def get_success_url(self):
+        return reverse_lazy('dashboard') + '?tab=create'
+
+def use_template(request, template_id):
+    template = get_object_or_404(Template, pk=template_id)
+    return render(request, 'products/use_template.html', {'template': template})
 
 
