@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+  <h1>Welcome to Accessible QR Audio</h1>
+  <p>This service helps businesses make their product information accessible to everyone.</p>
+  <a href="{% url 'dashboard' %}" class="btn">Get Started</a>
+{% endblock %}

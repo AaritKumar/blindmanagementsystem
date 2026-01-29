@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+  <h2>Your Products</h2>
+  <a href="{% url 'product_create' %}" class="btn">Create New Product Audio</a>
+  
+  {% if products %}
+    <ul>
+      {% for product in products %}
+        <li>
+          <h3>{{ product.name }}</h3>
+          <p>{{ product.text_description|truncatewords:20 }}</p>
+          {% if product.qr_code %}
+            <img src="{{ product.qr_code.image.url }}" alt="QR Code for {{ product.name }}" width="150">
+            <p><a href="{{ product.qr_code.image.url }}" download>Download QR Code</a></p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You haven't created any product audio descriptions yet.</p>
+  {% endif %}
+{% endblock %}
