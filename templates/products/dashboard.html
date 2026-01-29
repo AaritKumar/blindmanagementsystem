@@ -27,67 +27,134 @@
     }
     .grid-container {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 20px;
     }
     .grid-item {
-        border: 1px solid #ccc;
-        padding: 10px;
+        border: 1px solid #98c1d9; /* Light Blue */
+        padding: 15px;
         text-align: center;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        word-wrap: break-word; /* Ensure long names don't break layout */
+    }
+    .grid-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .item-actions {
-        margin-top: 10px;
+        margin-top: 15px;
+        opacity: 0;
+        transition: opacity 0.2s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+    .grid-item:hover .item-actions {
+        opacity: 1;
     }
     .btn-icon {
         background: none;
         border: none;
         cursor: pointer;
         font-size: 1.5em;
-        margin: 0 5px;
+        margin: 0 8px;
+        color: #3d5a80; /* Medium Blue */
+        transition: color 0.2s;
+    }
+    .btn-icon:hover {
+        color: #ee6c4d; /* Orange */
+    }
+    .btn-icon svg {
+        width: 24px;
+        height: 24px;
+        fill: #3d5a80; /* Medium Blue */
+        transition: fill 0.2s;
+    }
+    .btn-icon:hover svg {
+        fill: #ee6c4d; /* Orange */
+    }
+    .folder-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+        fill: #3d5a80; /* Medium Blue */
     }
     .fab {
         position: fixed;
-        bottom: 30px;
-        right: 30px;
+        bottom: 40px;
+        right: 40px;
         width: 60px;
         height: 60px;
         border-radius: 50%;
-        background-color: #005fcc;
+        background-color: #ee6c4d; /* Orange */
         color: white;
         font-size: 2em;
         border: none;
         cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        transition: transform 0.2s;
+    }
+    .fab:hover {
+        transform: scale(1.1);
     }
     .modal {
         display: none;
         position: fixed;
-        z-index: 1;
+        z-index: 1000;
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
         overflow: auto;
-        background-color: rgba(0,0,0,0.4);
+        background-color: rgba(0,0,0,0.5);
+    }
+    .folder-section {
+        margin-bottom: 30px;
     }
     .folder-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
-        font-size: 1.2em;
-        font-weight: bold;
+        padding: 15px;
+        background-color: #fff;
+        border: 1px solid #98c1d9; /* Light Blue */
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    .folder-header h3 {
+        margin: 0;
+        color: #293241; /* Dark Blue */
+        display: flex;
+        align-items: center;
+    }
+    .folder-toggle-icon {
+        width: 24px;
+        height: 24px;
+        fill: #3d5a80; /* Medium Blue */
+        transition: transform 0.3s;
+        margin-right: 10px;
+    }
+    .folder-header.open .folder-toggle-icon {
+        transform: rotate(90deg);
     }
     .folder-content {
-        display: none; /* Folders are closed by default */
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 0 15px;
     }
-    .folder-header::before {
-        content: '\\25B6'; /* Right-pointing triangle */
-        margin-right: 10px;
-        display: inline-block;
-        transition: transform 0.2s;
+    .folder-header.open + .folder-content {
+        max-height: 1000px; /* Adjust as needed */
+        padding: 15px;
     }
-    .folder-header.open::before {
+    .folder-header.open .folder-toggle-icon {
         transform: rotate(90deg);
     }
     .modal-content {
@@ -123,7 +190,11 @@
     {% for folder in folders %}
     <div class="folder-section">
         <h3 class="folder-header" data-folder-id="{{ folder.pk }}">
-            <span>&#128193; {{ folder.name }}</span>
+            <span>
+                <svg class="folder-toggle-icon" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg>
+                <svg class="folder-icon" viewBox="0 0 24 24"><path d="M10 4H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8c0-1.11-.9-2-2-2h-8l-2-2z"></path></svg>
+                {{ folder.name }}
+            </span>
             <div class="folder-actions">
                 <a href="{% url 'folder_edit' folder.pk %}" class="btn-icon" title="Edit Folder">&#9998;</a>
                 <form method="post" action="{% url 'folder_delete' folder.pk %}" style="display:inline;">
@@ -141,8 +212,10 @@
                         <div class="item-actions">
                              <button class="btn-icon preview-btn" title="Play Audio Preview">&#9654;</button>
                              <a href="{% url 'product_edit' product.pk %}" class="btn-icon" title="Edit">&#9998;</a>
-                             <a href="{{ product.qr_code.image.url }}" download class="btn-icon" title="Download">&#11123;</a>
-                             <form method="post" action="{% url 'product_delete' product.pk %}" style="display:inline;">
+                             <a href="{{ product.qr_code.image.url }}" download class="btn-icon" title="Download">
+                                     <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
+                                 </a>
+                                 <form method="post" action="{% url 'product_delete' product.pk %}" style="display:inline;">
                                  {% csrf_token %}
                                  <button type="submit" class="btn-icon" title="Delete" onclick="return confirm('Are you sure?');">&#128465;</button>
                              </form>
@@ -165,7 +238,9 @@
                     <div class="item-actions">
                         <button class="btn-icon preview-btn" title="Play Audio Preview">&#9654;</button>
                         <a href="{% url 'product_edit' product.pk %}" class="btn-icon" title="Edit">&#9998;</a>
-                        <a href="{{ product.qr_code.image.url }}" download class="btn-icon" title="Download">&#11123;</a>
+                        <a href="{{ product.qr_code.image.url }}" download class="btn-icon" title="Download">
+                            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
+                        </a>
                         <form method="post" action="{% url 'product_delete' product.pk %}" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn-icon" title="Delete" onclick="return confirm('Are you sure?');">&#128465;</button>
@@ -253,6 +328,18 @@ document.querySelectorAll('.grid-container').forEach(grid => {
                     'folder_id': toFolderId === 'null' ? null : toFolderId
                 })
             });
+
+            // --- FIX: Dynamically resize open folder after drop ---
+            requestAnimationFrame(() => {
+                const toGrid = evt.to;
+                if (toGrid.parentElement.classList.contains('folder-content')) {
+                    const folderContent = toGrid.parentElement;
+                    const folderHeader = folderContent.previousElementSibling;
+                    if (folderHeader.classList.contains('open')) {
+                        folderContent.style.maxHeight = folderContent.scrollHeight + "px";
+                    }
+                }
+            });
         }
     });
 });
@@ -270,16 +357,16 @@ document.querySelectorAll('.preview-btn').forEach(button => {
     });
 });
 
-// Folder toggle logic
+// Folder toggle logic with smooth animation
 document.querySelectorAll('.folder-header').forEach(header => {
     header.addEventListener('click', () => {
         header.classList.toggle('open');
         const content = header.nextElementSibling;
-        if (content.style.display === "block") {
-            content.style.display = "none";
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
         } else {
-            content.style.display = "block";
-        }
+            content.style.maxHeight = content.scrollHeight + "px";
+        } 
     });
 });
 </script>

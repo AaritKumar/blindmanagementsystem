@@ -1,8 +1,28 @@
 <h2>Create New Audio Label</h2>
+<style>
+    .create-tabs {
+        display: flex;
+        margin-bottom: 20px;
+    }
+    .create-tab-link {
+        padding: 10px 20px;
+        cursor: pointer;
+        border: 1px solid #98c1d9; /* Light Blue */
+        background-color: #f8f9fa;
+        color: #3d5a80; /* Medium Blue */
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+    .create-tab-link.selected {
+        background-color: #3d5a80; /* Medium Blue */
+        color: #fff;
+        border-color: #3d5a80;
+    }
+</style>
 
-<div class="tabs">
-    <button class="tab-link active" onclick="openCreateTab('custom')">Custom</button>
-    <button class="tab-link" onclick="openCreateTab('template')">Template</button>
+<div class="create-tabs">
+    <button class="create-tab-link selected" onclick="openCreateTab(event, 'custom')">Custom</button>
+    <button class="create-tab-link" onclick="openCreateTab(event, 'template')">Template</button>
 </div>
 
 <div id="custom" class="create-tab-content active">
@@ -35,15 +55,21 @@
         }
     });
 
-    function openCreateTab(tabName) {
-        var i;
-        var tabcontent = document.getElementsByClassName("create-tab-content");
+    function openCreateTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("create-tab-content");
         for (i = 0; i < tabcontent.length; i++) {
             tabcontent[i].style.display = "none";
         }
-        var tablinks = document.getElementsByClassName("tab-link");
-        // This is a simplified version, you might need to adjust based on your main tab script
+        tablinks = document.getElementsByClassName("create-tab-link");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" selected", "");
+        }
         document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " selected";
     }
+    // Set the default tab to be visible
+    document.getElementById('custom').style.display = "block";
+    document.getElementById('template').style.display = "none";
 </script>
 
