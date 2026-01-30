@@ -293,10 +293,13 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
+    // This script block contains all the client-side logic for the dashboard.
+    // It's written in plain JavaScript to avoid dependencies and keep things lightweight.
+
     function openTab(evt, tabName) {
-        var i, tabcontent, tablinks;
+        // Handles switching between the 'Catalog' and 'Create' tabs.
+        let i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tab-content");
         for (i = 0; i < tabcontent.length; i++) {
             tabcontent[i].style.display = "none";
@@ -307,75 +310,47 @@
         }
         document.getElementById(tabName).style.display = "block";
         
-        // Check if evt is the element itself or an event
-        if (evt.currentTarget) {
-            evt.currentTarget.className += " active";
-        } else {
-            evt.className += " active";
-        }
+        let target = evt.currentTarget ? evt.currentTarget : evt;
+        target.className += " active";
     }
 
-    // Modal logic for folder creation
-    var modal = document.getElementById("folder-modal");
-    var btn = document.getElementById("fab");
-    var span = document.getElementsByClassName("close-button")[0];
-    btn.onclick = function() {
-      modal.style.display = "block";
-    }
-    span.onclick = function() {
-      modal.style.display = "none";
-    }
+    // --- Modal Logic ---
+    // Manages the pop-up windows for creating folders and templates.
+    var folderModal = document.getElementById("folder-modal");
+    var fab = document.getElementById("fab");
+    var folderCloseBtn = folderModal.getElementsByClassName("close-button")[0];
 
-    // Modal logic for template creation
+    fab.onclick = () => folderModal.style.display = "block";
+    folderCloseBtn.onclick = () => folderModal.style.display = "none";
+
     var templateModal = document.getElementById("template-modal");
-    var templateBtn = document.getElementById("template-fab");
-    if (templateBtn) {
-        var templateSpan = templateModal.getElementsByClassName("close-button")[0];
-        templateBtn.onclick = function() {
-          templateModal.style.display = "block";
-        }
-        templateSpan.onclick = function() {
-          templateModal.style.display = "none";
-        }
-    }
-
-    // Search functionality for templates
-    const searchInput = document.getElementById('template-search');
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function() {
-            const filter = searchInput.value.toUpperCase();
-            const templateList = document.getElementById('template-list');
-            const items = templateList.getElementsByTagName('li');
-            for (let i = 0; i < items.length; i++) {
-                let a = items[i].getElementsByTagName("a")[0];
-                let txtValue = a.textContent || a.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    items[i].style.display = "";
-                } else {
-                    items[i].style.display = "none";
-                }
-            }
-        });
+    var templateFab = document.getElementById("template-fab");
+    if (templateFab) {
+        var templateCloseBtn = templateModal.getElementsByClassName("close-button")[0];
+        templateFab.onclick = () => templateModal.style.display = "block";
+        templateCloseBtn.onclick = () => templateModal.style.display = "none";
     }
 
     window.onclick = function(event) {
-      if (event.target == modal || event.target == templateModal) {
-        modal.style.display = "none";
-        templateModal.style.display = "none";
-      }
+        if (event.target == folderModal || event.target == templateModal) {
+            folderModal.style.display = "none";
+            if(templateModal) templateModal.style.display = "none";
+        }
     }
 
-    // SortableJS logic
+    // --- Drag-and-Drop Logic ---
+    // Uses SortableJS to enable dragging QR codes between folders.
     document.querySelectorAll('.grid-container').forEach(grid => {
         new Sortable(grid, {
             group: 'shared',
             animation: 150,
             ghostClass: 'blue-background-class',
             onEnd: function (evt) {
-                var itemEl = evt.item;
-                var toFolderId = evt.to.dataset.folderId;
-                var productId = itemEl.dataset.id;
+                let itemEl = evt.item;
+                let toFolderId = evt.to.dataset.folderId;
+                let productId = itemEl.dataset.id;
                 
+                // Send the change to the server.
                 fetch("{% url 'update_product_folder' %}", {
                     method: 'POST',
                     headers: {
@@ -388,7 +363,7 @@
                     })
                 });
 
-                // --- FIX: Dynamically resize open folder after drop ---
+                // After a drop, recalculate the height of the folder if it's open.
                 requestAnimationFrame(() => {
                     const toGrid = evt.to;
                     if (toGrid.parentElement.classList.contains('folder-content')) {
@@ -403,7 +378,9 @@
         });
     });
 
-    // Preview button logic
+    // --- UI Interaction Logic ---
+
+    // Audio preview for QR codes in the catalog.
     document.querySelectorAll('.preview-btn').forEach(button => {
         button.addEventListener('click', event => {
             const item = event.currentTarget.closest('.grid-item');
@@ -416,40 +393,41 @@
         });
     });
 
-// Folder toggle logic with smooth animation
-document.querySelectorAll('.folder-header').forEach(header => {
-    header.addEventListener('click', (event) => {
-        // Prevent click from bubbling to other elements if it's on the actions
-        if (!event.target.closest('.folder-actions')) {
-            header.classList.toggle('open');
-            const content = header.nextElementSibling;
-            if (content.style.maxHeight) {
-                content.style.maxHeight = null;
-            } else {
-                content.style.maxHeight = content.scrollHeight + "px";
-            } 
+    // Smooth open/close animation for folders.
+    document.querySelectorAll('.folder-header').forEach(header => {
+        header.addEventListener('click', (event) => {
+            // Clicks on the action buttons shouldn't toggle the folder.
+            if (!event.target.closest('.folder-actions')) {
+                header.classList.toggle('open');
+                const content = header.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                } 
+            }
+        });
+    });
+    
+    // --- Page Load Logic ---
+
+    // Handles the "?tab=create" URL parameter to open the correct tab.
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabToOpen = urlParams.get('tab');
+
+        if (tabToOpen === 'create') {
+            const createButton = Array.from(document.querySelectorAll('.tab-link')).find(el => el.textContent.trim() === 'Create');
+            if (createButton) {
+                openTab({currentTarget: createButton}, 'create');
+            }
+        } else {
+            document.getElementById('catalog').style.display = 'block';
+            document.getElementById('create').style.display = 'none';
+            document.querySelector('.tab-link[onclick*="catalog"]').classList.add('active');
+            document.querySelector('.tab-link[onclick*="create"]').classList.remove('active');
         }
     });
-});
-
-// Auto-switch to 'create' tab if specified in URL
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabToOpen = urlParams.get('tab');
-
-    if (tabToOpen === 'create') {
-        const createButton = Array.from(document.querySelectorAll('.tab-link')).find(el => el.textContent.trim() === 'Create');
-        if (createButton) {
-            openTab({currentTarget: createButton}, 'create');
-        }
-    } else {
-        // Ensure catalog is shown by default and correctly styled
-        document.getElementById('catalog').style.display = 'block';
-        document.getElementById('create').style.display = 'none';
-        document.querySelector('.tab-link[onclick*="catalog"]').classList.add('active');
-        document.querySelector('.tab-link[onclick*="create"]').classList.remove('active');
-    }
-});
 </script>
 
 {% endblock %}

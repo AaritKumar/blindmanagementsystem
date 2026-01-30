@@ -1,79 +1,135 @@
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+import json
+
 from .models import Product, QRCode, Folder, Template
 
-# Architectural Decision:
-# Class-based views are used extensively to follow Django's "Don't Repeat Yourself" (DRY) principle.
-# LoginRequiredMixin is used to protect views that should only be accessible to logged-in users.
-# The `get_queryset` method in the DashboardView is overridden to ensure that business users
-# can only see and manage their own products, which is a critical security and data privacy feature.
+# --- Main Page Views ---
+
+def home(request):
+    """ Renders the main landing page with 'Blind' and 'Business' choices. """
+    return render(request, 'products/home.html')
+
+def scan_beacon(request):
+    """ Renders the QR code scanning page for visually impaired users. """
+    return render(request, 'products/scan.html')
+
+# --- Business Dashboard Views ---
 
 class DashboardView(LoginRequiredMixin, ListView):
     """
-    Displays the business user's dashboard with Catalog and Create tabs.
+    Main dashboard for business users. Displays their product catalog,
+    folders, and the creation tools.
     """
     model = Product
     template_name = 'products/dashboard.html'
     context_object_name = 'products'
 
     def get_queryset(self):
+        # Users should only see their own products.
         return Product.objects.filter(owner=self.request.user).order_by('-created_at')
 
     def get_context_data(self, **kwargs):
+        # Add folders and templates to the context for display in the dashboard.
         context = super().get_context_data(**kwargs)
         context['folders'] = Folder.objects.filter(owner=self.request.user)
         context['templates'] = Template.objects.all().order_by('name')
         return context
 
+# --- Product CRUD Views ---
+
 class ProductCreateView(LoginRequiredMixin, CreateView):
-    """
-    Handles the creation of a new product description from the 'Create' tab.
-    """
+    """ Handles the creation of a new product. """
     model = Product
     fields = ['name', 'text_description']
     template_name = 'products/product_form.html'
     success_url = reverse_lazy('dashboard')
 
     def form_valid(self, form):
+        # Assign the logged-in user as the owner before saving.
         form.instance.owner = self.request.user
         product = form.save()
         QRCode.objects.create(linked_product=product)
-        return redirect(self.success_url)
+        return redirect(self.get_success_url())
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['templates'] = Template.objects.all()
-        return context
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
+    """ Handles editing an existing product. """
+    model = Product
+    fields = ['name', 'text_description']
+    template_name = 'products/product_edit_form.html'
+    success_url = reverse_lazy('dashboard')
+
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
+    """ Handles deleting a product. """
+    model = Product
+    success_url = reverse_lazy('dashboard')
 
 class ProductListenView(DetailView):
-    """
-    Public page that displays the product description and plays the audio.
-    This is the page the QR code will link to.
-    """
+    """ Public-facing page that reads a product's description out loud. """
     model = Product
     template_name = 'products/listen.html'
     context_object_name = 'product'
     slug_field = 'unique_slug'
     slug_url_kwarg = 'unique_slug'
 
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
-import json
+# --- Folder CRUD Views ---
 
-def home(request):
-    """
-    Serves the new landing page with 'Blind' and 'Business' options.
-    """
-    return render(request, 'products/home.html')
+class FolderCreateView(LoginRequiredMixin, CreateView):
+    """ Handles the creation of a new folder. """
+    model = Folder
+    fields = ['name']
+    success_url = reverse_lazy('dashboard')
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+class FolderUpdateView(LoginRequiredMixin, UpdateView):
+    """ Handles editing an existing folder. """
+    model = Folder
+    fields = ['name']
+    template_name = 'products/folder_edit_form.html'
+    success_url = reverse_lazy('dashboard')
+
+class FolderDeleteView(LoginRequiredMixin, DeleteView):
+    """ Handles deleting a folder and moves its contents to 'Uncategorized'. """
+    model = Folder
+    success_url = reverse_lazy('dashboard')
+
+    def form_valid(self, form):
+        # Don't orphan the products; move them to the main catalog.
+        Product.objects.filter(folder=self.object).update(folder=None)
+        return super().form_valid(form)
+
+# --- Template CRUD Views ---
+
+class TemplateCreateView(LoginRequiredMixin, CreateView):
+    """ Handles the creation of a new template. """
+    model = Template
+    fields = ['name', 'content']
+    
+    def get_success_url(self):
+        # Redirect back to the 'Create' tab to show the new template.
+        return reverse_lazy('dashboard') + '?tab=create'
+
+def use_template(request, template_id):
+    """ Renders a page to create a product from a template. """
+    template = get_object_or_404(Template, pk=template_id)
+    return render(request, 'products/use_template.html', {'template': template})
+
+# --- API Endpoints ---
 
 @login_required
 @require_POST
 def update_product_folder(request):
     """
-    API endpoint to update a product's folder.
+    API endpoint for the drag-and-drop functionality. Updates a product's
+    folder when it's moved in the catalog.
     """
     try:
         data = json.loads(request.body)
@@ -92,73 +148,4 @@ def update_product_folder(request):
         return JsonResponse({'status': 'ok'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-
-
-def scan_beacon(request):
-    """
-    Serves the audio beacon page for scanning QR codes.
-    """
-    return render(request, 'products/scan.html')
-
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
-    """
-    Handles the deletion of a product.
-    """
-    model = Product
-    success_url = reverse_lazy('dashboard')
-
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
-    """
-    Handles the editing of a product.
-    """
-    model = Product
-    fields = ['name', 'text_description']
-    template_name = 'products/product_edit_form.html'
-    success_url = reverse_lazy('dashboard')
-
-
-class FolderCreateView(LoginRequiredMixin, CreateView):
-    """
-    Handles the creation of a new folder.
-    """
-    model = Folder
-    fields = ['name']
-    success_url = reverse_lazy('dashboard')
-
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
-
-class FolderUpdateView(LoginRequiredMixin, UpdateView):
-    """
-    Handles the editing of a folder.
-    """
-    model = Folder
-    fields = ['name']
-    template_name = 'products/folder_edit_form.html'
-    success_url = reverse_lazy('dashboard')
-
-class FolderDeleteView(LoginRequiredMixin, DeleteView):
-    """
-    Handles the deletion of a folder. Products inside are moved to uncategorized.
-    """
-    model = Folder
-    success_url = reverse_lazy('dashboard')
-
-    def form_valid(self, form):
-        # Move products to uncategorized before deleting the folder
-        Product.objects.filter(folder=self.object).update(folder=None)
-        return super().form_valid(form)
-
-class TemplateCreateView(LoginRequiredMixin, CreateView):
-    model = Template
-    fields = ['name', 'content']
-    
-    def get_success_url(self):
-        return reverse_lazy('dashboard') + '?tab=create'
-
-def use_template(request, template_id):
-    template = get_object_or_404(Template, pk=template_id)
-    return render(request, 'products/use_template.html', {'template': template})
-
 
