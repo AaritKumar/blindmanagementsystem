@@ -10,41 +10,24 @@
     </div>
   </article>
 
-  <div role="toolbar" aria-label="Audio controls">
-      <button id="play-pause-btn" class="btn">Play Audio</button>
+  <div role="toolbar" aria-label="Audio controls" style="margin-top: 2rem;">
+      <button id="play-pause-btn" class="choice-btn" style="width: 100%; padding: 1.5rem; font-size: 1.5rem;">Play Audio</button>
   </div>
 
   <script>
-    // Architectural Decision:
-    // The Web Speech API (SpeechSynthesis) is used for TTS. This is a client-side technology,
-    // which means no server resources are consumed for generating audio, and it works offline
-    // after the page has loaded. This is a significant advantage over server-side TTS.
-    // The script is designed to be robust, checking for API availability and handling various
-    // states like playing, paused, and ended.
-
     document.addEventListener('DOMContentLoaded', () => {
         const descriptionDiv = document.getElementById('product-description');
         const textToSpeak = descriptionDiv.getAttribute('data-text');
         const playPauseBtn = document.getElementById('play-pause-btn');
         
-        // Check if the browser supports the SpeechSynthesis API.
         if ('speechSynthesis' in window) {
             const synth = window.speechSynthesis;
             let utterance = new SpeechSynthesisUtterance(`You've scanned an accessible audio label. ${textToSpeak}`);
             
-            // Set a fixed, slower speech rate for better clarity.
-            utterance.rate = 0.8; // Values between 0.1 and 10 are typical. 1 is default.
-
-            // Automatically play the audio when the page loads.
-            // A timeout is added to help ensure the voice synthesis is ready,
-            // which can sometimes be an issue on mobile browsers.
-            setTimeout(() => {
-                synth.speak(utterance);
-                playPauseBtn.textContent = 'Pause Audio';
-            }, 500);
-
+            utterance.rate = 0.8; 
 
             playPauseBtn.addEventListener('click', () => {
+                // On first click, start the speech. On subsequent clicks, toggle play/pause.
                 if (synth.paused) {
                     synth.resume();
                     playPauseBtn.textContent = 'Pause Audio';
@@ -52,19 +35,17 @@
                     synth.pause();
                     playPauseBtn.textContent = 'Resume Audio';
                 } else {
-                    // If speech has ended, start it again.
                     synth.speak(utterance);
                     playPauseBtn.textContent = 'Pause Audio';
                 }
             });
 
             utterance.onend = () => {
-                // For the blind user flow, automatically return to the scanner.
+                // Automatically return to the scanner for a seamless multi-scan experience.
                 window.location.href = "{% url 'scan_beacon' %}";
             };
 
         } else {
-            // If the browser does not support the API, hide the controls and inform the user.
             console.error("Sorry, your browser does not support the Web Speech API.");
             playPauseBtn.style.display = 'none';
         }
