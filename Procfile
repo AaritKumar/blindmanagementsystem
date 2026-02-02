@@ -1,0 +1,1 @@
+web: gunicorn tsa_project.wsgi --log-file -

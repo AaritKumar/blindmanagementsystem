@@ -82,4 +82,19 @@ The project demonstrates a confident and fluent application of modern web techno
     python manage.py runserver
     ```
 
+## Netlify Deployment (Read-Only)
+
+This project can be deployed to Netlify as a **read-only static site**. Due to the nature of Netlify's platform, any features that require a writable database (user login, creating products, etc.) will **not** work in the deployed version. This deployment method is intended to showcase the public-facing accessibility features, such as the "listen" pages and the QR scanner.
+
+### How It Works
+
+A custom Django management command (`build_static_pages`) is used to pre-generate a static HTML file for each product's "listen" page. The `netlify.toml` file is configured to run this command during the build process. The final deployed site consists of these pre-rendered pages and the project's static assets (CSS, JS, images).
+
+### Deployment Steps
+
+1.  **Populate Your Database:** Before deploying, make sure your local `db.sqlite3` database contains all the products you want to be live on the site.
+2.  **Connect to Netlify:** Connect your GitHub/GitLab repository to a new site in Netlify.
+3.  **Build Settings:** Netlify will automatically detect and use the `netlify.toml` file for build settings. No additional configuration is required.
+4.  **Deploy:** Trigger a deploy in Netlify. The build process will install your dependencies, generate the static pages, and deploy them.
+
 The application will be available at `http://127.0.0.1:8000`.
