@@ -82,19 +82,33 @@ The project demonstrates a confident and fluent application of modern web techno
     python manage.py runserver
     ```
 
-## Netlify Deployment (Read-Only)
+## Deployment on Render
 
-This project can be deployed to Netlify as a **read-only static site**. Due to the nature of Netlify's platform, any features that require a writable database (user login, creating products, etc.) will **not** work in the deployed version. This deployment method is intended to showcase the public-facing accessibility features, such as the "listen" pages and the QR scanner.
-
-### How It Works
-
-A custom Django management command (`build_static_pages`) is used to pre-generate a static HTML file for each product's "listen" page. The `netlify.toml` file is configured to run this command during the build process. The final deployed site consists of these pre-rendered pages and the project's static assets (CSS, JS, images).
+This project is configured for a seamless deployment on Render. Render is a modern cloud platform that is well-suited for hosting Django applications.
 
 ### Deployment Steps
 
-1.  **Populate Your Database:** Before deploying, make sure your local `db.sqlite3` database contains all the products you want to be live on the site.
-2.  **Connect to Netlify:** Connect your GitHub/GitLab repository to a new site in Netlify.
-3.  **Build Settings:** Netlify will automatically detect and use the `netlify.toml` file for build settings. No additional configuration is required.
-4.  **Deploy:** Trigger a deploy in Netlify. The build process will install your dependencies, generate the static pages, and deploy them.
+1.  **Create a New Web Service:** In the Render dashboard, create a "New Web Service" and connect it to your GitHub/GitLab repository.
+
+2.  **Configure the Service:** Render will automatically detect that you are using Python. Fill in the fields as follows:
+    *   **Region:** Choose a region close to your users.
+    *   **Branch:** `main` (or your primary branch).
+    *   **Build Command:** `bash render_build.sh`
+    *   **Start Command:** `gunicorn tsa_project.wsgi`
+
+3.  **Add a Database:**
+    *   In the Render dashboard, go to "New" > "PostgreSQL" to create a new database.
+    *   Once the database is created, copy the "Internal Connection URL."
+
+4.  **Add Environment Variables:**
+    *   Go back to your Web Service's settings and navigate to the "Environment" tab.
+    *   Add the following environment variables:
+        *   `SECRET_KEY`: A new, randomly generated secret key.
+        *   `DATABASE_URL`: The internal connection URL you copied from your PostgreSQL database.
+        *   `DEBUG`: `False`
+
+5.  **Deploy:** Click "Create Web Service." Render will automatically build and deploy your application. The first build may take a few minutes as it installs dependencies and runs migrations.
+
+Your application will be live at the URL provided by Render.
 
 The application will be available at `http://127.0.0.1:8000`.

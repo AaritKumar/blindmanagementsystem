@@ -32,11 +32,7 @@
     <p>Please select your user type.</p>
     <div class="choice-container">
         <a href="{% url 'scan_beacon' %}" class="choice-btn">Blind</a>
-        {% if is_static_build %}
-            <button class="choice-btn" disabled title="This feature is not available in the live demo.">Business</button>
-        {% else %}
-            <a href="{% url 'login' %}" class="choice-btn">Business</a>
-        {% endif %}
+        <a href="{% url 'login' %}" class="choice-btn">Business</a>
     </div>
 </div>
 {% endblock %}
