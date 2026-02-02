@@ -171,11 +171,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         startScanner() {
+            // Check for browser support first.
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                this.updateStatus("Camera access is not supported by your browser.");
+                return;
+            }
+
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
                 .then(stream => {
                     this.stream = stream;
                     this.video.srcObject = stream;
-                    this.video.setAttribute("playsinline", true);
+                    this.video.setAttribute("playsinline", true); // Required for iOS Safari
                     this.video.play();
                     this.scanning = true;
                     this.updateStatus('Scanning for QR code...');
@@ -183,7 +189,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .catch(err => {
                     console.error("Error starting camera: ", err);
-                    this.updateStatus("Could not start camera. Please grant permission and try again.");
+                    let message = "Could not start camera.";
+                    // Provide more specific, helpful error messages.
+                    if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+                        message = "Camera permission was denied. Please grant permission in your browser settings.";
+                    } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+                        message = "No camera was found on this device.";
+                    } else if (err.name === "NotReadableError" || err.name === "TrackStartError") {
+                        message = "The camera is currently in use by another application.";
+                    }
+                    this.updateStatus(message);
                 });
         }
 

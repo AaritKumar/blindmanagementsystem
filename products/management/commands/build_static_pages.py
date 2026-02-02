@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
 
         # --- Build the home page (index.html) ---
-        home_html = render_to_string('products/home.html')
+        home_html = render_to_string('products/home.html', {'is_static_build': True})
         with open(output_dir / 'index.html', 'w', encoding='utf-8') as f:
             f.write(home_html)
         self.stdout.write(self.style.SUCCESS('Successfully built index.html'))
