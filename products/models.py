@@ -8,6 +8,7 @@ from django.conf import settings
 from django.utils.text import slugify
 import shortuuid
 import codecs
+import base64
 
 class Template(models.Model):
     """ A reusable template for creating product descriptions. """
