@@ -136,6 +136,7 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+
 # Media files for user uploads. This is where QR codes will be stored.
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

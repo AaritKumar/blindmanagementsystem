@@ -25,7 +25,7 @@ urlpatterns = [
     path('', include('products.urls')),
 ]
 
-# This is not suitable for production but is perfect for development.
-# It allows Django's development server to serve user-uploaded media files.
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# This allows serving media files in both development and production.
+# In production, WhiteNoise will handle serving these files efficiently.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
