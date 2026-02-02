@@ -1,187 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'products/css/dashboard.css' %}">
+{% endblock %}
 
 {% block content %}
-<style>
-    .tabs {
-        display: flex;
-        border-bottom: 2px solid #ccc;
-    }
-    .tab-link {
-        padding: 10px 20px;
-        cursor: pointer;
-        border: none;
-        background: none;
-        font-size: 1.2em;
-        border-bottom: 2px solid transparent;
-    }
-    .tab-link.active {
-        border-bottom: 2px solid #005fcc;
-        font-weight: bold;
-    }
-    .tab-content {
-        display: none;
-        padding: 20px;
-    }
-    .tab-content.active {
-        display: block;
-    }
-    .grid-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
-    }
-    .grid-item {
-        border: 1px solid #98c1d9; /* Light Blue */
-        padding: 15px;
-        text-align: center;
-        border-radius: 8px;
-        background-color: #fff;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        transition: transform 0.2s, box-shadow 0.2s;
-        word-wrap: break-word; /* Ensure long names don't break layout */
-    }
-    .grid-item:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .item-actions {
-        margin-top: 15px;
-        opacity: 0;
-        transition: opacity 0.2s;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-    }
-    .grid-item:hover .item-actions {
-        opacity: 1;
-    }
-    .btn-icon {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1.5em;
-        margin: 0 8px;
-        color: #3d5a80; /* Medium Blue */
-        transition: color 0.2s;
-    }
-    .btn-icon:hover {
-        color: #ee6c4d; /* Orange */
-    }
-    .btn-icon svg {
-        width: 24px;
-        height: 24px;
-        fill: #3d5a80; /* Medium Blue */
-        transition: fill 0.2s;
-    }
-    .btn-icon:hover svg {
-        fill: #ee6c4d; /* Orange */
-    }
-    .folder-icon {
-        width: 24px;
-        height: 24px;
-        margin-right: 10px;
-        fill: #3d5a80; /* Medium Blue */
-    }
-    .fab {
-        position: fixed;
-        bottom: 40px;
-        right: 40px;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background-color: #ee6c4d; /* Orange */
-        color: white;
-        font-size: 2em;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        transition: transform 0.2s;
-    }
-    .fab:hover {
-        transform: scale(1.1);
-    }
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.5);
-    }
-    .folder-section {
-        margin-bottom: 30px;
-    }
-    .folder-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        padding: 15px;
-        background-color: #fff;
-        border: 1px solid #98c1d9; /* Light Blue */
-        border-radius: 8px;
-        margin-bottom: 15px;
-    }
-    .folder-header h3 {
-        margin: 0;
-        color: #293241; /* Dark Blue */
-        display: flex;
-        align-items: center;
-    }
-    .folder-toggle-icon {
-        width: 24px;
-        height: 24px;
-        fill: #3d5a80; /* Medium Blue */
-        transition: transform 0.3s;
-        margin-right: 10px;
-    }
-    .folder-header.open .folder-toggle-icon {
-        transform: rotate(90deg);
-    }
-    .folder-content {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease-out;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 0 15px;
-    }
-    .folder-header.open + .folder-content {
-        max-height: 1000px; /* Adjust as needed */
-        padding: 15px;
-    }
-    .folder-header.open .folder-toggle-icon {
-        transform: rotate(90deg);
-    }
-    .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: 500px;
-    }
-    .close-button {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-    }
-    .close-button:hover,
-    .close-button:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-</style>
-
 <div class="tabs">
-    <button class="tab-link active" onclick="openTab(event, 'catalog')">Catalog</button>
-    <button class="tab-link" onclick="openTab(event, 'create')">Create</button>
+    <button class="tab-link active" data-tab="catalog">Catalog</button>
+    <button class="tab-link" data-tab="create">Create</button>
 </div>
 
 <div id="catalog" class="tab-content active">
@@ -281,8 +108,8 @@
         <form method="post" action="{% url 'template_create' %}">
             {% csrf_token %}
             <div class="form-group">
-                <label for="id_name">Template Name:</label>
-                <input type="text" name="name" id="id_name" required>
+                <label for="id_name_template">Template Name:</label>
+                <input type="text" name="name" id="id_name_template" required>
             </div>
             <div class="form-group">
                 <label for="id_content">Template Content:</label>
@@ -293,142 +120,16 @@
     </div>
 </div>
 
+<script src="{% static 'js/Sortable.min.js' %}"></script>
 <script>
-    // This script block contains all the client-side logic for the dashboard.
-    // It's written in plain JavaScript to avoid dependencies and keep things lightweight.
-
-    function openTab(evt, tabName) {
-        // Handles switching between the 'Catalog' and 'Create' tabs.
-        let i, tabcontent, tablinks;
-        tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
-        }
-        tablinks = document.getElementsByClassName("tab-link");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
-        }
-        document.getElementById(tabName).style.display = "block";
-        
-        let target = evt.currentTarget ? evt.currentTarget : evt;
-        target.className += " active";
-    }
-
-    // --- Modal Logic ---
-    // Manages the pop-up windows for creating folders and templates.
-    var folderModal = document.getElementById("folder-modal");
-    var fab = document.getElementById("fab");
-    var folderCloseBtn = folderModal.getElementsByClassName("close-button")[0];
-
-    fab.onclick = () => folderModal.style.display = "block";
-    folderCloseBtn.onclick = () => folderModal.style.display = "none";
-
-    var templateModal = document.getElementById("template-modal");
-    var templateFab = document.getElementById("template-fab");
-    if (templateFab) {
-        var templateCloseBtn = templateModal.getElementsByClassName("close-button")[0];
-        templateFab.onclick = () => templateModal.style.display = "block";
-        templateCloseBtn.onclick = () => templateModal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-        if (event.target == folderModal || event.target == templateModal) {
-            folderModal.style.display = "none";
-            if(templateModal) templateModal.style.display = "none";
-        }
-    }
-
-    // --- Drag-and-Drop Logic ---
-    // Uses SortableJS to enable dragging QR codes between folders.
-    document.querySelectorAll('.grid-container').forEach(grid => {
-        new Sortable(grid, {
-            group: 'shared',
-            animation: 150,
-            ghostClass: 'blue-background-class',
-            onEnd: function (evt) {
-                let itemEl = evt.item;
-                let toFolderId = evt.to.dataset.folderId;
-                let productId = itemEl.dataset.id;
-                
-                // Send the change to the server.
-                fetch("{% url 'update_product_folder' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify({
-                        'product_id': productId,
-                        'folder_id': toFolderId === 'null' ? null : toFolderId
-                    })
-                });
-
-                // After a drop, recalculate the height of the folder if it's open.
-                requestAnimationFrame(() => {
-                    const toGrid = evt.to;
-                    if (toGrid.parentElement.classList.contains('folder-content')) {
-                        const folderContent = toGrid.parentElement;
-                        const folderHeader = folderContent.previousElementSibling;
-                        if (folderHeader.classList.contains('open')) {
-                            folderContent.style.maxHeight = folderContent.scrollHeight + "px";
-                        }
-                    }
-                });
-            }
-        });
-    });
-
-    // --- UI Interaction Logic ---
-
-    // Audio preview for QR codes in the catalog.
-    document.querySelectorAll('.preview-btn').forEach(button => {
-        button.addEventListener('click', event => {
-            const item = event.currentTarget.closest('.grid-item');
-            const description = item.dataset.description;
-            if (description && 'speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(description);
-                utterance.rate = 0.8;
-                window.speechSynthesis.speak(utterance);
-            }
-        });
-    });
-
-    // Smooth open/close animation for folders.
-    document.querySelectorAll('.folder-header').forEach(header => {
-        header.addEventListener('click', (event) => {
-            // Clicks on the action buttons shouldn't toggle the folder.
-            if (!event.target.closest('.folder-actions')) {
-                header.classList.toggle('open');
-                const content = header.nextElementSibling;
-                if (content.style.maxHeight) {
-                    content.style.maxHeight = null;
-                } else {
-                    content.style.maxHeight = content.scrollHeight + "px";
-                } 
-            }
-        });
-    });
-    
-    // --- Page Load Logic ---
-
-    // Handles the "?tab=create" URL parameter to open the correct tab.
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tabToOpen = urlParams.get('tab');
-
-        if (tabToOpen === 'create') {
-            const createButton = Array.from(document.querySelectorAll('.tab-link')).find(el => el.textContent.trim() === 'Create');
-            if (createButton) {
-                openTab({currentTarget: createButton}, 'create');
-            }
-        } else {
-            document.getElementById('catalog').style.display = 'block';
-            document.getElementById('create').style.display = 'none';
-            document.querySelector('.tab-link[onclick*="catalog"]').classList.add('active');
-            document.querySelector('.tab-link[onclick*="create"]').classList.remove('active');
-        }
-    });
+    const dashboardConfig = {
+        urls: {
+            updateProductFolder: "{% url 'update_product_folder' %}"
+        },
+        csrfToken: "{{ csrf_token }}"
+    };
 </script>
+<script src="{% static 'products/js/dashboard.js' %}"></script>
 
 {% endblock %}
 

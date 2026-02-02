@@ -4,6 +4,7 @@ from django.core.files import File
 from django.db import models
 from django.contrib.auth.models import User
 import shortuuid
+import codecs
 
 class Template(models.Model):
     """ A reusable template for creating product descriptions. """
@@ -34,9 +35,27 @@ class Product(models.Model):
     unique_slug = models.SlugField(unique=True, max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
-        """ Automatically generate a unique slug on the first save. """
+        """
+        Overrides the default save method to provide essential functionality:
+        1.  Sanitizes the text_description to fix encoding issues from templates.
+        2.  Generates a unique slug on the first save.
+        """
+        # --- Data Sanitization (Definitive Fix) ---
+        # This is the single point of truth for cleaning the description.
+        # It decodes any escaped characters (like '\\n') and normalizes line endings.
+        if self.text_description:
+            try:
+                # This handles strings that have been escaped for JavaScript.
+                decoded_text = codecs.decode(self.text_description, 'unicode_escape')
+                self.text_description = decoded_text.replace('\r\n', '\n').replace('\r', '\n')
+            except (UnicodeDecodeError, TypeError):
+                # This handles cases where the string is already clean.
+                self.text_description = self.text_description.replace('\r\n', '\n').replace('\r', '\n')
+            
+        # --- Slug Generation ---
         if not self.unique_slug:
             self.unique_slug = shortuuid.uuid()
+            
         super().save(*args, **kwargs)
 
     def __str__(self):

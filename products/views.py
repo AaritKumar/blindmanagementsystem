@@ -43,6 +43,10 @@ class DashboardView(LoginRequiredMixin, ListView):
 
 # --- Product CRUD Views ---
 
+import codecs
+
+# ... (other imports)
+
 class ProductCreateView(LoginRequiredMixin, CreateView):
     """ Handles the creation of a new product. """
     model = Product
@@ -51,11 +55,33 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('dashboard')
 
     def form_valid(self, form):
-        # Assign the logged-in user as the owner before saving.
+        """
+        This method is called when valid form data has been POSTed.
+        It sanitizes the input before saving.
+        """
+        # --- Belt-and-Suspenders Sanitization ---
+        # We clean the data here to ensure it's in good shape before the model's
+        # final, definitive cleanup.
+        raw_description = self.request.POST.get('text_description', '')
+        try:
+            # This handles strings that have been escaped for JavaScript.
+            decoded_text = codecs.decode(raw_description, 'unicode_escape')
+        except (UnicodeDecodeError, TypeError):
+            # This handles cases where the string is already clean.
+            decoded_text = raw_description
+        
+        form.instance.text_description = decoded_text
+
+        # Assign the owner to the product.
         form.instance.owner = self.request.user
-        product = form.save()
-        QRCode.objects.create(linked_product=product)
-        return redirect(self.get_success_url())
+        
+        # Call the parent class's form_valid() method.
+        response = super().form_valid(form)
+        
+        # Create the related QRCode.
+        QRCode.objects.create(linked_product=self.object)
+        
+        return response
 
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
     """ Handles editing an existing product. """
