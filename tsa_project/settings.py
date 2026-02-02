@@ -45,10 +45,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic', # Important for serving static files
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Add this line
     'rest_framework',
     'products',
     "accounts",
 ]
+
+SITE_ID = 1  # Add this line
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

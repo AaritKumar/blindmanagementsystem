@@ -3,6 +3,8 @@ from io import BytesIO
 from django.core.files import File
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from django.conf import settings
 import shortuuid
 import codecs
 
@@ -76,8 +78,14 @@ class QRCode(models.Model):
         Placing this logic in the model ensures that a QR code is always valid
         and points to the correct place.
         """
-        # In production, this domain should come from the Site framework or settings.
-        self.public_url = f"http://127.0.0.1:8000/listen/{self.linked_product.unique_slug}/"
+        # Determine the correct protocol (http vs https)
+        protocol = 'https' if not settings.DEBUG else 'http'
+        
+        # Get the current domain from the Django Sites framework
+        current_site = Site.objects.get_current()
+        domain = current_site.domain
+        
+        self.public_url = f"{protocol}://{domain}/listen/{self.linked_product.unique_slug}/"
         
         # Only generate the image if it doesn't already exist.
         if not self.image:
