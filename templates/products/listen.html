@@ -22,16 +22,30 @@
         
         if ('speechSynthesis' in window) {
             const synth = window.speechSynthesis;
-            let utterance = new SpeechSynthesisUtterance(`You've scanned an accessible audio label. ${textToSpeak}`);
-            
+            const utterance = new SpeechSynthesisUtterance(`You've scanned an accessible audio label. ${textToSpeak}`);
             utterance.rate = 0.8;
 
-            // A short delay helps ensure the voice list has loaded, preventing issues on some browsers.
-            // The audio will now play automatically thanks to the global audio_unlock.js script.
-            setTimeout(() => {
-                synth.speak(utterance);
-                playPauseBtn.textContent = 'Pause Audio';
-            }, 500);
+            const speakText = () => {
+                // A common mobile browser bug requires a "kick" to resume speech synthesis
+                // if it was paused from a previous page.
+                if (synth.paused) {
+                    synth.resume();
+                }
+                if (!synth.speaking) {
+                    synth.speak(utterance);
+                    playPauseBtn.textContent = 'Pause Audio';
+                }
+            };
+
+            // This is the robust way to handle speech synthesis. The 'voiceschanged' event
+            // signals that the TTS engine is fully initialized and ready to speak.
+            if (synth.getVoices().length !== 0) {
+                // If voices are already loaded, speak after a brief, safe delay.
+                setTimeout(speakText, 200);
+            } else {
+                // Otherwise, wait for the signal from the browser.
+                synth.onvoiceschanged = speakText;
+            }
 
             playPauseBtn.addEventListener('click', () => {
                 if (synth.paused) {
@@ -41,9 +55,7 @@
                     synth.pause();
                     playPauseBtn.textContent = 'Resume Audio';
                 } else {
-                    // If speech has ended, start it again.
-                    synth.speak(utterance);
-                    playPauseBtn.textContent = 'Pause Audio';
+                    speakText(); // Allow re-playing if it has finished
                 }
             });
 
