@@ -120,47 +120,112 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
 
-            this.canvas.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height); // Clear previous frame
+            this.canvas.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
             if (code) {
                 this.handleQRCode(code);
+            } else {
+                requestAnimationFrame(() => this.tick());
             }
-            
-            requestAnimationFrame(() => this.tick());
         }
 
         handleQRCode(code) {
-            const loc = code.location;
-            this.drawLine(loc.topLeftCorner, loc.topRightCorner, "#FF3B58");
-            this.drawLine(loc.topRightCorner, loc.bottomRightCorner, "#FF3B58");
-            this.drawLine(loc.bottomRightCorner, loc.bottomLeftCorner, "#FF3B58");
-            this.drawLine(loc.bottomLeftCorner, loc.topLeftCorner, "#FF3B58");
+            this.drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+            this.drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+            this.drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+            this.drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
 
-            // --- 1. Directional Cue (Panning) ---
-            const qrCenterX = (loc.topLeftCorner.x + loc.topRightCorner.x) / 2;
-            const pan = (qrCenterX / this.canvasElement.width) * 2 - 1; // -1 (left) to 1 (right)
-
-            // --- 2. Proximity Cue (Beep Speed) ---
-            const qrWidth = Math.abs(loc.topRightCorner.x - loc.topLeftCorner.x);
-            const percentArea = (qrWidth * qrWidth) / (this.canvasElement.width * this.canvasElement.height);
-            const proximity = Math.min(percentArea / 0.1, 1.0); // Normalize to 0-1 based on the 10% cutoff
+            const qrWidth = Math.abs(code.location.topRightCorner.x - code.location.topLeftCorner.x);
+            const proximity = Math.min(qrWidth / (this.canvasElement.width * 0.7), 1.0);
 
             if (proximity >= 1.0) {
-                this.statusMessage.textContent = "QR Code detected! Redirecting...";
+                this.scanning = false; // Pause scanning
+                this.statusMessage.textContent = "QR Code detected! Fetching audio...";
                 this.beacon.playSuccess();
-                this.stopScanner();
-                window.location.href = code.data;
+                this.processScannedURL(code.data);
+                return; // Stop the tick loop until audio is done
+            }
+            
+            this.playBeacon(code.location);
+            requestAnimationFrame(() => this.tick());
+        }
+
+        processScannedURL(url) {
+            try {
+                const urlObject = new URL(url);
+                const pathParts = urlObject.pathname.split('/').filter(part => part);
+                const uniqueSlug = pathParts[pathParts.length - 1];
+                
+                // Construct the API URL relative to the current host
+                const apiUrl = `${urlObject.origin}/api/product/${uniqueSlug}/`;
+
+                fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Product not found.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        this.speak(data.name, data.text_description);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching product data:', error);
+                        this.statusMessage.textContent = "Could not retrieve audio. Please try again.";
+                        setTimeout(() => this.resumeScanning(), 3000);
+                    });
+
+            } catch (error) {
+                console.error("Invalid QR code URL:", error);
+                this.statusMessage.textContent = "Invalid QR code. Please use a valid product QR code.";
+                setTimeout(() => this.resumeScanning(), 3000);
+            }
+        }
+
+        speak(name, description) {
+            if (!('speechSynthesis' in window)) {
+                this.statusMessage.textContent = "Text-to-speech is not supported on your browser.";
+                setTimeout(() => this.resumeScanning(), 3000);
                 return;
             }
             
-            // Refined exponential curve for beep interval. More intuitive.
+            this.statusMessage.textContent = `Playing: ${name}`;
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(`You've scanned an accessible audio label. ${description}`);
+            utterance.rate = 0.8;
+            
+            utterance.onend = () => {
+                this.resumeScanning();
+            };
+            
+            utterance.onerror = (event) => {
+                console.error("Speech synthesis error:", event.error);
+                this.statusMessage.textContent = "Could not play audio.";
+                setTimeout(() => this.resumeScanning(), 3000);
+            };
+
+            synth.speak(utterance);
+        }
+        
+        resumeScanning() {
+            this.statusMessage.textContent = 'Scanning for QR code...';
+            this.scanning = true;
+            requestAnimationFrame(() => this.tick());
+        }
+
+        playBeacon(location) {
+            const qrCenterX = (location.topLeftCorner.x + location.topRightCorner.x) / 2;
+            const pan = (qrCenterX / this.canvasElement.width) * 2 - 1;
+
+            const qrWidth = Math.abs(location.topRightCorner.x - location.topLeftCorner.x);
+            const proximity = Math.min(qrWidth / (this.canvasElement.width * 0.7), 1.0);
+            
             const maxInterval = 1000;
             const minInterval = 150;
             const interval = minInterval + (maxInterval - minInterval) * Math.pow(1 - proximity, 2);
 
-            // --- 3. Centering Cue (Pitch) ---
-            const basePitch = 660; // E5
-            const peakPitch = 880; // A5
-            const centeredness = 1 - Math.abs(pan); // 1 when centered, 0 at edges
+            const basePitch = 660;
+            const peakPitch = 880;
+            const centeredness = 1 - Math.abs(pan);
             const pitch = basePitch + (peakPitch - basePitch) * centeredness;
 
             const now = Date.now();
