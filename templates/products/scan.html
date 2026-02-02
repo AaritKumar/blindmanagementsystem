@@ -10,20 +10,14 @@
 {% block content %}
 <div class="scan-page-wrapper">
   <h1>Scan QR Code</h1>
+  <p>Point your camera at a QR code. An audio beacon will guide you. The page will automatically navigate when the code is close.</p>
   
-  <div id="initial-view">
-      <p>Tap the button below to start your camera and enable the audio beacon.</p>
-      <button id="start-scan-btn" class="choice-btn">Start Scanning</button>
+  <div id="scanner-container">
+    <video id="camera-feed" playsinline></video>
+    <canvas id="canvas"></canvas>
   </div>
   
-  <div id="scanner-view" style="display: none;">
-      <p>Point your camera at a QR code. An audio beacon will guide you.</p>
-      <div id="scanner-container">
-        <video id="camera-feed" playsinline></video>
-        <canvas id="canvas"></canvas>
-      </div>
-      <p id="status-message" role="status" aria-live="polite">Ready to scan.</p>
-  </div>
+  <p id="status-message" role="status" aria-live="polite">Attempting to start camera...</p>
 </div>
 
   <script src="{% static 'js/jsQR.min.js' %}"></script>

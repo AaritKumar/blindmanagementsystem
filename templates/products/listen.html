@@ -10,8 +10,8 @@
     </div>
   </article>
 
-  <div role="toolbar" aria-label="Audio controls" style="margin-top: 2rem;">
-      <button id="play-pause-btn" class="choice-btn" style="width: 100%; padding: 1.5rem; font-size: 1.5rem;">Play Audio</button>
+  <div role="toolbar" aria-label="Audio controls">
+      <button id="play-pause-btn" class="btn">Play Audio</button>
   </div>
 
   <script>
@@ -24,10 +24,16 @@
             const synth = window.speechSynthesis;
             let utterance = new SpeechSynthesisUtterance(`You've scanned an accessible audio label. ${textToSpeak}`);
             
-            utterance.rate = 0.8; 
+            utterance.rate = 0.8;
+
+            // A short delay helps ensure the voice list has loaded, preventing issues on some browsers.
+            // The audio will now play automatically thanks to the global audio_unlock.js script.
+            setTimeout(() => {
+                synth.speak(utterance);
+                playPauseBtn.textContent = 'Pause Audio';
+            }, 500);
 
             playPauseBtn.addEventListener('click', () => {
-                // On first click, start the speech. On subsequent clicks, toggle play/pause.
                 if (synth.paused) {
                     synth.resume();
                     playPauseBtn.textContent = 'Pause Audio';
@@ -35,6 +41,7 @@
                     synth.pause();
                     playPauseBtn.textContent = 'Resume Audio';
                 } else {
+                    // If speech has ended, start it again.
                     synth.speak(utterance);
                     playPauseBtn.textContent = 'Pause Audio';
                 }

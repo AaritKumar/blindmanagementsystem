@@ -86,10 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.statusMessage = document.getElementById('status-message');
             this.beacon = new DirectionalBeacon();
             
-            this.startScanBtn = document.getElementById('start-scan-btn');
-            this.initialView = document.getElementById('initial-view');
-            this.scannerView = document.getElementById('scanner-view');
-            
             this.scanning = false;
             this.stream = null;
             this.lastBeepTime = 0;
@@ -98,13 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         init() {
-            this.startScanBtn.addEventListener('click', () => {
-                this.initialView.style.display = 'none';
-                this.scannerView.style.display = 'block';
-                // This is the crucial step: initialize audio context from a user gesture.
-                this.beacon._initAudio(); 
-                this.startScanner();
-            });
+            this.startScanner();
             window.addEventListener('beforeunload', () => this.stopScanner());
         }
 
