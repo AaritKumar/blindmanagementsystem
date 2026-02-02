@@ -5,6 +5,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.conf import settings
+from django.utils.text import slugify
 import shortuuid
 import codecs
 
@@ -92,8 +93,9 @@ class QRCode(models.Model):
             qr_image = qrcode.make(self.public_url)
             canvas = qr_image.get_image()
             
-            # In-memory file to avoid hitting the disk.
-            fname = f'qr_code-{self.linked_product.unique_slug}.png'
+            # Create a URL-safe and filesystem-safe filename from the product name.
+            safe_filename = slugify(self.linked_product.name)
+            fname = f'{safe_filename}.png'
             buffer = BytesIO()
             canvas.save(buffer, 'PNG')
             self.image.save(fname, File(buffer), save=False)
