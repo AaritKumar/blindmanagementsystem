@@ -12,7 +12,11 @@ class Command(BaseCommand):
         
         # Define the output directory for the static pages
         output_dir = settings.BASE_DIR / 'static_pages'
+        if os.path.exists(output_dir):
+            import shutil
+            shutil.rmtree(output_dir)
         os.makedirs(output_dir, exist_ok=True)
+
 
         # --- Build the home page (index.html) ---
         home_html = render_to_string('products/home.html')

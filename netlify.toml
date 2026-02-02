@@ -8,6 +8,11 @@
   publish = "staticfiles/"
 
 [[redirects]]
+  from = "/scan/"
+  to = "/scan/index.html"
+  status = 200
+
+[[redirects]]
   from = "/listen/:slug/"
   to = "/listen/:slug/index.html"
   status = 200
