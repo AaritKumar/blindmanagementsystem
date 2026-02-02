@@ -9,6 +9,7 @@
 <div class="tabs">
     <button class="tab-link active" data-tab="catalog">Catalog</button>
     <button class="tab-link" data-tab="create">Create</button>
+    <button class="tab-link" data-tab="instructions">Instructions</button>
 </div>
 
 <div id="catalog" class="tab-content active">
@@ -99,6 +100,31 @@
 
 <div id="create" class="tab-content">
     {% include 'products/product_form.html' %}
+</div>
+
+<div id="instructions" class="tab-content">
+    <h2>Placement Instructions</h2>
+    <p>For the best results, place the QR code in a consistent and predictable location. The audio beacon is most effective when users know where to expect the code.</p>
+    <div class="instructions-container">
+        <div class="instructions-column">
+            <h3>Correct Placement</h3>
+            <div class="instruction-image">
+                <img src="{% static 'products/img/Sign_Yes.png' %}" alt="QR code placed below a restroom sign, which is correct.">
+            </div>
+            <div class="instruction-image">
+                <img src="{% static 'products/img/Shelf_Yes.png' %}" alt="QR code placed directly on the shelf talker below a product, which is correct.">
+            </div>
+        </div>
+        <div class="instructions-column">
+            <h3>Incorrect Placement</h3>
+            <div class="instruction-image">
+                <img src="{% static 'products/img/Sign_No.png' %}" alt="QR code placed far to the side of a restroom sign, which is incorrect.">
+            </div>
+            <div class="instruction-image">
+                <img src="{% static 'products/img/Shelf_No.png' %}" alt="QR code placed far to the side of a product on a shelf, which is incorrect.">
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="template-modal" class="modal">
