@@ -1,10 +1,11 @@
 [build]
   # This command will be run by Netlify to build your site.
-  # It installs dependencies, runs the static page generator, and collects all static files.
-  command = "pip install -r requirements.txt && python manage.py build_static_pages && python manage.py collectstatic --no-input"
+  # 1. Install dependencies.
+  # 2. Collect all static assets (CSS, JS, images) into the 'staticfiles' directory.
+  # 3. Generate the static HTML pages directly into the 'staticfiles' directory.
+  command = "pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py build_static_pages"
   
   # This is the directory that Netlify will deploy.
-  # 'staticfiles' is the default location where Django's collectstatic command places files.
   publish = "staticfiles/"
 
 [[redirects]]
