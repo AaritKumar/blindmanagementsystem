@@ -10,38 +10,23 @@
         </div>
     </article>
 
-    <div role="toolbar" aria-label="Audio controls">
-        <button id="play-pause-btn" class="btn">Play Audio</button>
+    <div role="toolbar" aria-label="Audio controls" class="visually-hidden">
+        <p>Audio is playing.</p>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const descriptionDiv = document.getElementById('product-description');
             const textToSpeak = descriptionDiv.getAttribute('data-text');
-            const playPauseBtn = document.getElementById('play-pause-btn');
             
             if ('speechSynthesis' in window) {
                 const synth = window.speechSynthesis;
-                let utterance = new SpeechSynthesisUtterance(`You've scanned an accessible audio label. ${textToSpeak}`);
+                const utterance = new SpeechSynthesisUtterance(`You've scanned an accessible audio label. ${textToSpeak}`);
                 utterance.rate = 0.8;
 
                 setTimeout(() => {
                     synth.speak(utterance);
-                    playPauseBtn.textContent = 'Pause Audio';
                 }, 500);
-
-                playPauseBtn.addEventListener('click', () => {
-                    if (synth.paused) {
-                        synth.resume();
-                        playPauseBtn.textContent = 'Pause Audio';
-                    } else if (synth.speaking) {
-                        synth.pause();
-                        playPauseBtn.textContent = 'Resume Audio';
-                    } else {
-                        synth.speak(utterance);
-                        playPauseBtn.textContent = 'Pause Audio';
-                    }
-                });
 
                 utterance.onend = () => {
                     window.location.href = "{% url 'scan_beacon' %}";
@@ -49,8 +34,24 @@
 
             } else {
                 console.error("Sorry, your browser does not support the Web Speech API.");
-                playPauseBtn.style.display = 'none';
+                descriptionDiv.insertAdjacentHTML('afterend', '<p>Sorry, your browser does not support audio playback.</p>');
             }
         });
     </script>
+{% endblock %}
+
+{% block head %}
+<style>
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+</style>
 {% endblock %}
