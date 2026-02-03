@@ -2,8 +2,7 @@ from django.urls import path
 from .views import (
     DashboardView, ProductCreateView, ProductListenView, home, scan_beacon, 
     ProductDeleteView, FolderCreateView, ProductUpdateView, update_product_folder, 
-    FolderUpdateView, FolderDeleteView, TemplateCreateView, use_template,
-    get_product_data  # Import the new view
+    FolderUpdateView, FolderDeleteView, TemplateCreateView, use_template
 )
 
 urlpatterns = [
@@ -19,7 +18,5 @@ urlpatterns = [
     path('templates/<int:template_id>/use/', use_template, name='use_template'),
     path('listen/<slug:unique_slug>/', ProductListenView.as_view(), name='product_listen'),
     path('api/update_product_folder/', update_product_folder, name='update_product_folder'),
-    # New API endpoint for fetching product data
-    path('api/product/<slug:unique_slug>/', get_product_data, name='get_product_data'),
     path('scan/', scan_beacon, name='scan_beacon'),
 ]

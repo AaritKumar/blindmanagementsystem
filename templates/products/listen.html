@@ -3,71 +3,54 @@
 {% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
-  <article aria-labelledby="product-name">
-    <h1 id="product-name">{{ product.name }}</h1>
-    <div id="product-description" data-text="{{ product.text_description|escapejs }}">
-        {{ product.text_description|linebreaks }}
+    <article aria-labelledby="product-name">
+        <h1 id="product-name">{{ product.name }}</h1>
+        <div id="product-description" data-text="{{ product.text_description|escapejs }}">
+            {{ product.text_description|linebreaks }}
+        </div>
+    </article>
+
+    <div role="toolbar" aria-label="Audio controls">
+        <button id="play-pause-btn" class="btn">Play Audio</button>
     </div>
-  </article>
 
-  <div role="toolbar" aria-label="Audio controls">
-      <button id="play-pause-btn" class="btn">Play Audio</button>
-  </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const descriptionDiv = document.getElementById('product-description');
+            const textToSpeak = descriptionDiv.getAttribute('data-text');
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            
+            if ('speechSynthesis' in window) {
+                const synth = window.speechSynthesis;
+                let utterance = new SpeechSynthesisUtterance(`You've scanned an accessible audio label. ${textToSpeak}`);
+                utterance.rate = 0.8;
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const descriptionDiv = document.getElementById('product-description');
-        const textToSpeak = descriptionDiv.getAttribute('data-text');
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        
-        if ('speechSynthesis' in window) {
-            const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(`You've scanned an accessible audio label. ${textToSpeak}`);
-            utterance.rate = 0.8;
-
-            const speakText = () => {
-                // A common mobile browser bug requires a "kick" to resume speech synthesis
-                // if it was paused from a previous page.
-                if (synth.paused) {
-                    synth.resume();
-                }
-                if (!synth.speaking) {
+                setTimeout(() => {
                     synth.speak(utterance);
                     playPauseBtn.textContent = 'Pause Audio';
-                }
-            };
+                }, 500);
 
-            // This is the robust way to handle speech synthesis. The 'voiceschanged' event
-            // signals that the TTS engine is fully initialized and ready to speak.
-            if (synth.getVoices().length !== 0) {
-                // If voices are already loaded, speak after a brief, safe delay.
-                setTimeout(speakText, 200);
+                playPauseBtn.addEventListener('click', () => {
+                    if (synth.paused) {
+                        synth.resume();
+                        playPauseBtn.textContent = 'Pause Audio';
+                    } else if (synth.speaking) {
+                        synth.pause();
+                        playPauseBtn.textContent = 'Resume Audio';
+                    } else {
+                        synth.speak(utterance);
+                        playPauseBtn.textContent = 'Pause Audio';
+                    }
+                });
+
+                utterance.onend = () => {
+                    window.location.href = "{% url 'scan_beacon' %}";
+                };
+
             } else {
-                // Otherwise, wait for the signal from the browser.
-                synth.onvoiceschanged = speakText;
+                console.error("Sorry, your browser does not support the Web Speech API.");
+                playPauseBtn.style.display = 'none';
             }
-
-            playPauseBtn.addEventListener('click', () => {
-                if (synth.paused) {
-                    synth.resume();
-                    playPauseBtn.textContent = 'Pause Audio';
-                } else if (synth.speaking) {
-                    synth.pause();
-                    playPauseBtn.textContent = 'Resume Audio';
-                } else {
-                    speakText(); // Allow re-playing if it has finished
-                }
-            });
-
-            utterance.onend = () => {
-                // Automatically return to the scanner for a seamless multi-scan experience.
-                window.location.href = "{% url 'scan_beacon' %}";
-            };
-
-        } else {
-            console.error("Sorry, your browser does not support the Web Speech API.");
-            playPauseBtn.style.display = 'none';
-        }
-    });
-  </script>
+        });
+    </script>
 {% endblock %}

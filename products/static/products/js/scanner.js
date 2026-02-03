@@ -1,9 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
-    /**
-     * A sophisticated audio beacon that provides directional, proximity,
-     * and centering cues for locating a QR code.
-     */
     class DirectionalBeacon {
         constructor() {
             this.audioCtx = null;
@@ -14,13 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         _initAudio() {
             if (this.isInitialized) return;
-            // Best practice: Create AudioContext after a user gesture.
-            // In our case, the 'gesture' is the app detecting a QR code for the first time.
             try {
                 this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 this.panner = this.audioCtx.createStereoPanner();
                 this.gainNode = this.audioCtx.createGain();
-                
                 this.gainNode.gain.setValueAtTime(0, this.audioCtx.currentTime);
                 this.panner.connect(this.gainNode);
                 this.gainNode.connect(this.audioCtx.destination);
@@ -30,36 +22,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        /**
-         * Plays a single "ping" sound with spatial panning and pitch modulation.
-         * The sound has a soft attack and decay to be less jarring.
-         * @param {number} pan - Stereo pan, from -1 (left) to 1 (right).
-         * @param {number} pitch - The frequency of the beep in Hz.
-         * @param {number} duration - The duration of the beep in seconds.
-         */
         beep(pan, pitch, duration = 0.15) {
             if (!this.isInitialized) this._initAudio();
-            if (!this.audioCtx) return; // Exit if AudioContext failed to initialize.
-            
+            if (!this.audioCtx) return;
+
             const now = this.audioCtx.currentTime;
             this.panner.pan.setValueAtTime(pan, now);
-
-            // Create a pleasant "ping" sound using a gain envelope.
             this.gainNode.gain.cancelScheduledValues(now);
             this.gainNode.gain.setValueAtTime(0, now);
-            this.gainNode.gain.linearRampToValueAtTime(1, now + 0.01); // Quick attack
-            this.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration); // Smooth decay
+            this.gainNode.gain.linearRampToValueAtTime(1, now + 0.01);
+            this.gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
             const oscillator = this.audioCtx.createOscillator();
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(pitch, now);
-            
             oscillator.connect(this.panner);
             oscillator.start(now);
             oscillator.stop(now + duration);
         }
 
-        /** Plays a clear, distinct sound to indicate a successful scan. */
         playSuccess() {
             if (!this.isInitialized) this._initAudio();
             if (!this.audioCtx) return;
@@ -73,11 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             oscillator.stop(now + 0.2);
         }
     }
-    
-    /**
-     * Manages the camera feed, QR code detection, and coordinates
-     * with the DirectionalBeacon to provide user feedback.
-     */
+
     class QRScanner {
         constructor() {
             this.video = document.getElementById('camera-feed');
@@ -85,11 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
             this.canvas = this.canvasElement.getContext('2d');
             this.statusMessage = document.getElementById('status-message');
             this.beacon = new DirectionalBeacon();
-            
             this.scanning = false;
             this.stream = null;
             this.lastBeepTime = 0;
-            
             this.init();
         }
 
@@ -117,108 +92,38 @@ document.addEventListener('DOMContentLoaded', () => {
             this.canvasElement.width = this.video.videoWidth;
             this.canvas.drawImage(this.video, 0, 0, this.canvasElement.width, this.canvasElement.height);
             const imageData = this.canvas.getImageData(0, 0, this.canvasElement.width, this.canvasElement.height);
-            
             const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
 
             this.canvas.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
             if (code) {
                 this.handleQRCode(code);
-            } else {
-                requestAnimationFrame(() => this.tick());
             }
+
+            requestAnimationFrame(() => this.tick());
         }
 
         handleQRCode(code) {
-            this.drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
-            this.drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
-            this.drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
-            this.drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+            const loc = code.location;
+            this.drawLine(loc.topLeftCorner, loc.topRightCorner, "#FF3B58");
+            this.drawLine(loc.topRightCorner, loc.bottomRightCorner, "#FF3B58");
+            this.drawLine(loc.bottomRightCorner, loc.bottomLeftCorner, "#FF3B58");
+            this.drawLine(loc.bottomLeftCorner, loc.topLeftCorner, "#FF3B58");
 
-            const qrWidth = Math.abs(code.location.topRightCorner.x - code.location.topLeftCorner.x);
-            const proximity = Math.min(qrWidth / (this.canvasElement.width * 0.7), 1.0);
-
-            if (proximity >= 1.0) {
-                this.scanning = false; // Pause scanning
-                this.statusMessage.textContent = "QR Code detected! Fetching audio...";
-                this.beacon.playSuccess();
-                this.processScannedURL(code.data);
-                return; // Stop the tick loop until audio is done
-            }
-            
-            this.playBeacon(code.location);
-            requestAnimationFrame(() => this.tick());
-        }
-
-        processScannedURL(url) {
-            try {
-                const urlObject = new URL(url);
-                const pathParts = urlObject.pathname.split('/').filter(part => part);
-                const uniqueSlug = pathParts[pathParts.length - 1];
-                
-                // Construct the API URL relative to the current host
-                const apiUrl = `${urlObject.origin}/api/product/${uniqueSlug}/`;
-
-                fetch(apiUrl)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Product not found.');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        this.speak(data.name, data.text_description);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching product data:', error);
-                        this.statusMessage.textContent = "Could not retrieve audio. Please try again.";
-                        setTimeout(() => this.resumeScanning(), 3000);
-                    });
-
-            } catch (error) {
-                console.error("Invalid QR code URL:", error);
-                this.statusMessage.textContent = "Invalid QR code. Please use a valid product QR code.";
-                setTimeout(() => this.resumeScanning(), 3000);
-            }
-        }
-
-        speak(name, description) {
-            if (!('speechSynthesis' in window)) {
-                this.statusMessage.textContent = "Text-to-speech is not supported on your browser.";
-                setTimeout(() => this.resumeScanning(), 3000);
-                return;
-            }
-            
-            this.statusMessage.textContent = `Playing: ${name}`;
-            const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(`You've scanned an accessible audio label. ${description}`);
-            utterance.rate = 0.8;
-            
-            utterance.onend = () => {
-                this.resumeScanning();
-            };
-            
-            utterance.onerror = (event) => {
-                console.error("Speech synthesis error:", event.error);
-                this.statusMessage.textContent = "Could not play audio.";
-                setTimeout(() => this.resumeScanning(), 3000);
-            };
-
-            synth.speak(utterance);
-        }
-        
-        resumeScanning() {
-            this.statusMessage.textContent = 'Scanning for QR code...';
-            this.scanning = true;
-            requestAnimationFrame(() => this.tick());
-        }
-
-        playBeacon(location) {
-            const qrCenterX = (location.topLeftCorner.x + location.topRightCorner.x) / 2;
+            const qrCenterX = (loc.topLeftCorner.x + loc.topRightCorner.x) / 2;
             const pan = (qrCenterX / this.canvasElement.width) * 2 - 1;
 
-            const qrWidth = Math.abs(location.topRightCorner.x - location.topLeftCorner.x);
-            const proximity = Math.min(qrWidth / (this.canvasElement.width * 0.7), 1.0);
-            
+            const qrWidth = Math.abs(loc.topRightCorner.x - loc.topLeftCorner.x);
+            const percentArea = (qrWidth * qrWidth) / (this.canvasElement.width * this.canvasElement.height);
+            const proximity = Math.min(percentArea / 0.1, 1.0);
+
+            if (proximity >= 1.0) {
+                this.statusMessage.textContent = "QR Code detected! Redirecting...";
+                this.beacon.playSuccess();
+                this.stopScanner();
+                window.location.href = code.data;
+                return;
+            }
+
             const maxInterval = 1000;
             const minInterval = 150;
             const interval = minInterval + (maxInterval - minInterval) * Math.pow(1 - proximity, 2);
@@ -236,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         startScanner() {
-            // Check for browser support first.
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 this.updateStatus("Camera access is not supported by your browser.");
                 return;
@@ -246,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(stream => {
                     this.stream = stream;
                     this.video.srcObject = stream;
-                    this.video.setAttribute("playsinline", true); // Required for iOS Safari
+                    this.video.setAttribute("playsinline", true);
                     this.video.play();
                     this.scanning = true;
                     this.updateStatus('Scanning for QR code...');
@@ -255,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(err => {
                     console.error("Error starting camera: ", err);
                     let message = "Could not start camera.";
-                    // Provide more specific, helpful error messages.
                     if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
                         message = "Camera permission was denied. Please grant permission in your browser settings.";
                     } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
@@ -282,4 +185,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     new QRScanner();
 });
-

@@ -2,160 +2,157 @@
 {% load static %}
 
 {% block head %}
-<link rel="stylesheet" href="{% static 'products/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'products/css/dashboard.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="tabs">
-    <button class="tab-link active" data-tab="catalog">Catalog</button>
-    <button class="tab-link" data-tab="create">Create</button>
-    <button class="tab-link" data-tab="instructions">Instructions</button>
-</div>
-
-<div id="catalog" class="tab-content active">
-    <h2>Catalog</h2>
-
-    {% for folder in folders %}
-    <div class="folder-section">
-        <h3 class="folder-header" data-folder-id="{{ folder.pk }}">
-            <span>
-                <svg class="folder-toggle-icon" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg>
-                <svg class="folder-icon" viewBox="0 0 24 24"><path d="M10 4H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8c0-1.11-.9-2-2-2h-8l-2-2z"></path></svg>
-                {{ folder.name }}
-            </span>
-            <div class="folder-actions">
-                <a href="{% url 'folder_edit' folder.pk %}" class="btn-icon" title="Edit Folder">&#9998;</a>
-                <form method="post" action="{% url 'folder_delete' folder.pk %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-icon" title="Delete Folder" onclick="return confirm('Are you sure you want to delete this folder? All products inside will be moved to Uncategorized.');">&#128465;</button>
-                </form>
-            </div>
-        </h3>
-        <div class="folder-content">
-            <div class="grid-container folder-grid" id="folder-{{ folder.pk }}" data-folder-id="{{ folder.pk }}">
-                 {% for product in folder.products.all %}
-                    <div class="grid-item" data-id="{{ product.pk }}" data-description="{{ product.text_description|escapejs }}">
-                        <p><strong>{{ product.name }}</strong></p>
-                        <img src="{{ product.qr_code.image.url }}" alt="QR Code for {{ product.name }}" width="100">
-                        <div class="item-actions">
-                             <button class="btn-icon preview-btn" title="Play Audio Preview">&#9654;</button>
-                             <a href="{% url 'product_edit' product.pk %}" class="btn-icon" title="Edit">&#9998;</a>
-                             <a href="{{ product.qr_code.image.url }}" download class="btn-icon" title="Download">
-                                     <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
-                                 </a>
-                                 <form method="post" action="{% url 'product_delete' product.pk %}" style="display:inline;">
-                                 {% csrf_token %}
-                                 <button type="submit" class="btn-icon" title="Delete" onclick="return confirm('Are you sure?');">&#128465;</button>
-                             </form>
-                        </div>
-                    </div>
-                 {% endfor %}
-            </div>
-        </div>
+    <div class="tabs">
+        <button class="tab-link active" data-tab="catalog">Catalog</button>
+        <button class="tab-link" data-tab="create">Create</button>
+        <button class="tab-link" data-tab="instructions">Instructions</button>
     </div>
-    {% endfor %}
-    
-    <div class="folder-section">
-        <h3>Uncategorized</h3>
-        <div class="grid-container" id="uncategorized-grid" data-folder-id="null">
-            {% for product in products %}
-                {% if not product.folder %}
-                <div class="grid-item" data-id="{{ product.pk }}" data-description="{{ product.text_description|escapejs }}">
-                    <p><strong>{{ product.name }}</strong></p>
-                    <img src="{{ product.qr_code.image.url }}" alt="QR Code for {{ product.name }}" width="100">
-                    <div class="item-actions">
-                        <button class="btn-icon preview-btn" title="Play Audio Preview">&#9654;</button>
-                        <a href="{% url 'product_edit' product.pk %}" class="btn-icon" title="Edit">&#9998;</a>
-                        <a href="{{ product.qr_code.image.url }}" download class="btn-icon" title="Download">
-                            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
-                        </a>
-                        <form method="post" action="{% url 'product_delete' product.pk %}" style="display:inline;">
+
+    <div id="catalog" class="tab-content active">
+        <h2>Catalog</h2>
+        {% for folder in folders %}
+            <div class="folder-section">
+                <h3 class="folder-header" data-folder-id="{{ folder.pk }}">
+                    <span>
+                        <svg class="folder-toggle-icon" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg>
+                        <svg class="folder-icon" viewBox="0 0 24 24"><path d="M10 4H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8c0-1.11-.9-2-2-2h-8l-2-2z"></path></svg>
+                        {{ folder.name }}
+                    </span>
+                    <div class="folder-actions">
+                        <a href="{% url 'folder_edit' folder.pk %}" class="btn-icon" title="Edit Folder">&#9998;</a>
+                        <form method="post" action="{% url 'folder_delete' folder.pk %}" style="display:inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-icon" title="Delete" onclick="return confirm('Are you sure?');">&#128465;</button>
+                            <button type="submit" class="btn-icon" title="Delete Folder" onclick="return confirm('Are you sure you want to delete this folder? All products inside will be moved to Uncategorized.');">&#128465;</button>
                         </form>
                     </div>
+                </h3>
+                <div class="folder-content">
+                    <div class="grid-container folder-grid" id="folder-{{ folder.pk }}" data-folder-id="{{ folder.pk }}">
+                        {% for product in folder.products.all %}
+                            <div class="grid-item" data-id="{{ product.pk }}" data-description="{{ product.text_description|escapejs }}">
+                                <p><strong>{{ product.name }}</strong></p>
+                                <img src="{{ product.qr_code.image_data }}" alt="QR Code for {{ product.name }}" width="100">
+                                <div class="item-actions">
+                                    <button class="btn-icon preview-btn" title="Play Audio Preview">&#9654;</button>
+                                    <a href="{% url 'product_edit' product.pk %}" class="btn-icon" title="Edit">&#9998;</a>
+                                    <a href="{{ product.qr_code.image_data }}" download="{{ product.qr_code.get_filename }}" class="btn-icon" title="Download">
+                                        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
+                                    </a>
+                                    <form method="post" action="{% url 'product_delete' product.pk %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-icon" title="Delete" onclick="return confirm('Are you sure?');">&#128465;</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-    </div>
-    
-    <button id="fab" class="fab">+</button>
-</div>
-
-<div id="folder-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>Create New Folder</h2>
-        <form method="post" action="{% url 'folder_create' %}">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="id_name">Folder Name:</label>
-                <input type="text" name="name" id="id_name" required>
             </div>
-            <button type="submit" class="btn">Create Folder</button>
-        </form>
-    </div>
-</div>
-
-<div id="create" class="tab-content">
-    {% include 'products/product_form.html' %}
-</div>
-
-<div id="instructions" class="tab-content">
-    <h2>Placement Instructions</h2>
-    <p>For the best results, place the QR code in a consistent and predictable location. The audio beacon is most effective when users know where to expect the code.</p>
-    <div class="instructions-container">
-        <div class="instructions-column">
-            <h3>Correct Placement</h3>
-            <div class="instruction-image">
-                <img src="{% static 'products/img/Sign_Yes.png' %}" alt="QR code placed below a restroom sign, which is correct.">
-            </div>
-            <div class="instruction-image">
-                <img src="{% static 'products/img/Shelf_Yes.png' %}" alt="QR code placed directly on the shelf talker below a product, which is correct.">
+        {% endfor %}
+        
+        <div class="folder-section">
+            <h3>Uncategorized</h3>
+            <div class="grid-container" id="uncategorized-grid" data-folder-id="null">
+                {% for product in products %}
+                    {% if not product.folder %}
+                        <div class="grid-item" data-id="{{ product.pk }}" data-description="{{ product.text_description|escapejs }}">
+                            <p><strong>{{ product.name }}</strong></p>
+                            <img src="{{ product.qr_code.image_data }}" alt="QR Code for {{ product.name }}" width="100">
+                            <div class="item-actions">
+                                <button class="btn-icon preview-btn" title="Play Audio Preview">&#9654;</button>
+                                <a href="{% url 'product_edit' product.pk %}" class="btn-icon" title="Edit">&#9998;</a>
+                                <a href="{{ product.qr_code.image_data }}" download="{{ product.qr_code.get_filename }}" class="btn-icon" title="Download">
+                                    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
+                                </a>
+                                <form method="post" action="{% url 'product_delete' product.pk %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-icon" title="Delete" onclick="return confirm('Are you sure?');">&#128465;</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
             </div>
         </div>
-        <div class="instructions-column">
-            <h3>Incorrect Placement</h3>
-            <div class="instruction-image">
-                <img src="{% static 'products/img/Sign_No.png' %}" alt="QR code placed far to the side of a restroom sign, which is incorrect.">
+        
+        <button id="fab" class="fab">+</button>
+    </div>
+
+    <div id="folder-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Create New Folder</h2>
+            <form method="post" action="{% url 'folder_create' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">Folder Name:</label>
+                    <input type="text" name="name" id="id_name" required>
+                </div>
+                <button type="submit" class="btn">Create Folder</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="create" class="tab-content">
+        {% include 'products/product_form.html' %}
+    </div>
+
+    <div id="instructions" class="tab-content">
+        <h2>Placement Instructions</h2>
+        <p>For the best results, place the QR code in a consistent and predictable location. The audio beacon is most effective when users know where to expect the code.</p>
+        <div class="instructions-container">
+            <div class="instructions-column">
+                <h3>Correct Placement</h3>
+                <div class="instruction-image">
+                    <img src="{% static 'products/img/Sign_Yes.png' %}" alt="QR code placed below a restroom sign, which is correct.">
+                </div>
+                <div class="instruction-image">
+                    <img src="{% static 'products/img/Shelf_Yes.png' %}" alt="QR code placed directly on the shelf talker below a product, which is correct.">
+                </div>
             </div>
-            <div class="instruction-image">
-                <img src="{% static 'products/img/Shelf_No.png' %}" alt="QR code placed far to the side of a product on a shelf, which is incorrect.">
+            <div class="instructions-column">
+                <h3>Incorrect Placement</h3>
+                <div class="instruction-image">
+                    <img src="{% static 'products/img/Sign_No.png' %}" alt="QR code placed far to the side of a restroom sign, which is incorrect.">
+                </div>
+                <div class="instruction-image">
+                    <img src="{% static 'products/img/Shelf_No.png' %}" alt="QR code placed far to the side of a product on a shelf, which is incorrect.">
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div id="template-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>Create New Template</h2>
-        <form method="post" action="{% url 'template_create' %}">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="id_name_template">Template Name:</label>
-                <input type="text" name="name" id="id_name_template" required>
-            </div>
-            <div class="form-group">
-                <label for="id_content">Template Content:</label>
-                <textarea name="content" id="id_content" required placeholder="Example: Ingredients: [blank][List ingredients]"></textarea>
-            </div>
-            <button type="submit" class="btn">Create Template</button>
-        </form>
+    <div id="template-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Create New Template</h2>
+            <form method="post" action="{% url 'template_create' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name_template">Template Name:</label>
+                    <input type="text" name="name" id="id_name_template" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_content">Template Content:</label>
+                    <textarea name="content" id="id_content" required placeholder="Example: Ingredients: [blank][List ingredients]"></textarea>
+                </div>
+                <button type="submit" class="btn">Create Template</button>
+            </form>
+        </div>
     </div>
-</div>
 
-<script src="{% static 'js/Sortable.min.js' %}"></script>
-<script>
-    const dashboardConfig = {
-        urls: {
-            updateProductFolder: "{% url 'update_product_folder' %}"
-        },
-        csrfToken: "{{ csrf_token }}"
-    };
-</script>
-<script src="{% static 'products/js/dashboard.js' %}"></script>
-
+    <script src="{% static 'js/Sortable.min.js' %}"></script>
+    <script>
+        const dashboardConfig = {
+            urls: {
+                updateProductFolder: "{% url 'update_product_folder' %}"
+            },
+            csrfToken: "{{ csrf_token }}"
+        };
+    </script>
+    <script src="{% static 'products/js/dashboard.js' %}"></script>
 {% endblock %}
-

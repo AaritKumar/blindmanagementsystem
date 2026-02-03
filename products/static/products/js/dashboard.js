@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // A small class to encapsulate dashboard functionality for better organization.
     class Dashboard {
         constructor(config) {
             this.urls = config.urls;
@@ -24,17 +23,15 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.tab-link').forEach(tl => tl.classList.remove('active'));
             document.getElementById(tabName).style.display = 'block';
             
-            let target = evt.currentTarget ? evt.currentTarget : document.querySelector(`.tab-link[data-tab='${tabName}']`);
+            let target = evt.currentTarget || document.querySelector(`.tab-link[data-tab='${tabName}']`);
             target.classList.add('active');
         }
 
         initModals() {
-            // Folder Modal
             const folderModal = document.getElementById("folder-modal");
             document.getElementById("fab").onclick = () => folderModal.style.display = "block";
             folderModal.querySelector(".close-button").onclick = () => folderModal.style.display = "none";
 
-            // Template Modal
             const templateModal = document.getElementById("template-modal");
             const templateFab = document.getElementById("template-fab");
             if (templateFab) {
@@ -43,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             window.onclick = (event) => {
-                if (event.target == folderModal || event.target == templateModal) {
+                if (event.target === folderModal || event.target === templateModal) {
                     folderModal.style.display = "none";
                     if (templateModal) templateModal.style.display = "none";
                 }
@@ -83,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const folderContent = toGrid.parentElement;
                     const folderHeader = folderContent.previousElementSibling;
                     if (folderHeader.classList.contains('open')) {
-                        folderContent.style.maxHeight = folderContent.scrollHeight + "px";
+                        folderContent.style.maxHeight = `${folderContent.scrollHeight}px`;
                     }
                 }
             });
@@ -109,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!event.target.closest('.folder-actions')) {
                         header.classList.toggle('open');
                         const content = header.nextElementSibling;
-                        content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px";
+                        content.style.maxHeight = content.style.maxHeight ? null : `${content.scrollHeight}px`;
                     }
                 });
             });
@@ -117,14 +114,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         handleUrlParams() {
             const tabToOpen = new URLSearchParams(window.location.search).get('tab');
-            if (tabToOpen === 'create') {
-                this.openTab({currentTarget: document.querySelector('.tab-link[data-tab="create"]')}, 'create');
-            } else {
-                this.openTab({currentTarget: document.querySelector('.tab-link[data-tab="catalog"]')}, 'catalog');
-            }
+            const targetTab = tabToOpen === 'create' ? 'create' : 'catalog';
+            const targetElement = document.querySelector(`.tab-link[data-tab='${targetTab}']`);
+            this.openTab({ currentTarget: targetElement }, targetTab);
         }
     }
 
-    // Initialize the dashboard functionality
     new Dashboard(dashboardConfig);
 });
