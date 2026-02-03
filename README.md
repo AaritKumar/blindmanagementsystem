@@ -1,52 +1,68 @@
 # Accessible QR Audio Generator
 
-This Django-based web application is an accessibility-focused tool designed to bridge the gap between physical products and digital information for visually impaired users. It allows businesses to create QR codes that, when scanned, provide an immediate text-to-speech audio description of a product.
+This project is a Django-based web application built to improve accessibility for visually impaired users by connecting physical products to clear, immediate audio information. Businesses can generate QR codes that, when scanned, automatically play a text-to-speech audio description of a product—no screens or extra interaction required.
 
-The project's design and implementation were guided by a rigorous academic rubric, with a primary focus on creativity, software coding practices, complexity, and technical skill, all centered around the yearly theme of removing barriers for people with visual disabilities.
+The idea behind this project came from a desire to remove everyday barriers faced by blind users. Rather than treating accessibility as an add-on, the entire application was designed around an audio-first experience. While the project was developed with an academic rubric in mind, the main goal was to create something genuinely useful, thoughtful, and technically strong.
 
-## Rubric-Centered Design & Justification
+---
 
-This project was engineered not just to be functional, but to be exemplary. Every major architectural and feature decision was made to satisfy the highest standards of an academic grading rubric.
+## Design Approach
 
-### 1. Creativity (Weight x2)
+This project was intentionally designed to go beyond basic functionality. Each major feature reflects a balance of creativity, solid coding practices, architectural complexity, and technical skill.
 
-The core theme of accessibility is expressed through innovative and non-obvious features that directly address barriers for blind users.
+---
 
-*   **Directional Audio Beacon:** This is the project's most significant creative feature. Standard QR scanners provide no feedback until a code is successfully read. Our scanner, however, implements a sophisticated **spatial audio beacon** using the Web Audio API. When a QR code enters the camera's view, a soft beep is emitted. This beep is panned left or right in the user's headphones to provide an intuitive, directional cue, guiding them toward the QR code's physical location. The beep's frequency also increases as the QR code gets closer, creating a "Geiger counter" effect that signals proximity. This transforms the scanning experience from a game of chance into a guided process.
-*   **Seamless Audio-First Workflow:** The entire user flow for the visually impaired user is designed to be "hands-off." The camera activates automatically, the beacon provides guidance, the QR code is read automatically, the description is spoken aloud, and the application can then seamlessly return to scanning mode for the next product. This minimizes the cognitive load and number of interactions required.
+## Creativity
 
-### 2. Software Coding Practices (Weight x2)
+### Directional Audio Beacon
 
-The project adheres to professional software development standards, emphasizing clarity, maintainability, and clear documentation of intent.
+One of the biggest challenges for blind users is locating a QR code in the first place. Most scanners give no feedback until the code is already centered. To solve this, the scanner includes a directional audio beacon built with the Web Audio API.
 
-*   **Separation of Concerns:** All CSS and JavaScript have been externalized into static files. This is a fundamental best practice that improves maintainability, readability, and caching performance. Inline styles and scripts have been entirely eliminated from the templates.
-*   **Object-Oriented JavaScript:** The client-side logic for the dashboard and the QR scanner has been refactored from loose procedural functions into encapsulated ES6 classes (`Dashboard`, `QRScanner`, `DirectionalBeacon`). This improves code organization, reduces global namespace pollution, and makes the frontend architecture more robust and scalable.
-*   **Intentional Commenting:** Comments are used judiciously to explain the "why" behind non-trivial code, particularly in the `views.py` logic, the Django models' `save` methods, and the JavaScript classes.
-*   **Comprehensive README:** This document itself serves as evidence of intentional design and clear communication, which are hallmarks of professional coding practices.
+When a QR code enters the camera’s view, a soft beep begins playing. The sound pans left or right in the user’s headphones based on where the QR code is positioned on the screen, helping guide the user toward it. As the QR code gets closer, the beep increases in frequency, similar to a Geiger counter. This turns scanning into a guided, intuitive process instead of trial and error.
 
-### 3. Complexity (Weight x2)
+### Audio-First Workflow
 
-The internal design of the application demonstrates a well-architected, cohesive system that is more sophisticated than a simple linear application.
+The experience is designed to be as hands-free as possible. The camera activates automatically, the beacon guides the user, the QR code is read without manual input, and the product description is spoken aloud immediately. Afterward, the app can return to scanning mode for the next product, reducing cognitive load and unnecessary interaction.
 
-*   **Model-View-Template (MVT) Architecture:** The project correctly leverages Django's MVT pattern, with clear distinctions between data models (`models.py`), request handling logic (`views.py`), and presentation (`templates`).
-*   **Justified Abstraction:** The introduction of JavaScript classes is a deliberate choice to manage complexity. The `DirectionalBeacon` class, for example, abstracts away the complex Web Audio API, providing a clean and reusable interface for the `QRScanner`. This is a prime example of creating abstractions that improve clarity and scalability.
-*   **RESTful API for Client-Server Communication:** A simple, clean API endpoint is used for the drag-and-drop functionality on the dashboard. This decouples the frontend from the backend, allowing for a more dynamic and responsive user experience without full page reloads.
+---
 
-### 4. Technical Skill (Weight x1)
+## Software Coding Practices
 
-The project demonstrates a confident and fluent application of modern web technologies.
+- **Separation of Concerns:** All CSS and JavaScript are stored in external static files, improving readability, maintainability, and performance.
+- **Object-Oriented JavaScript:** Frontend logic is organized into ES6 classes such as `Dashboard`, `QRScanner`, and `DirectionalBeacon`, keeping responsibilities clearly defined.
+- **Purposeful Commenting:** Comments explain the reasoning behind non-trivial logic, especially in Django views, model methods, and complex frontend code.
+- **Clear Documentation:** This README reflects intentional design choices and clearly communicates how and why the system works.
 
-*   **Advanced Web Audio API:** The use of `AudioContext`, `StereoPannerNode`, and dynamic `OscillatorNode` manipulation for the directional beacon showcases a high level of technical proficiency with advanced browser APIs.
-*   **Modern JavaScript (ES6):** The use of classes, `const`/`let`, arrow functions, and Promises demonstrates fluency with modern JavaScript idioms.
-*   **Django Best Practices:** The project correctly uses class-based views, the `LoginRequiredMixin` for security, `reverse_lazy` for robust URL management, and Django's ORM for all database interactions.
-*   **Accessibility (ARIA):** ARIA roles and live regions (`role="status"`, `aria-live="polite"`) are used to provide non-visual feedback to screen reader users, ensuring that status changes (e.g., "Camera activated") are communicated effectively.
+---
+
+## Complexity
+
+- **Django MVT Architecture:** The project follows Django’s Model-View-Template pattern, cleanly separating data, logic, and presentation.
+- **Meaningful Abstractions:** Complex functionality is broken into reusable components. For example, the `DirectionalBeacon` class encapsulates Web Audio API logic, keeping the QR scanner simple and modular.
+- **RESTful Communication:** A lightweight API endpoint supports drag-and-drop interactions on the dashboard, allowing dynamic updates without full page reloads.
+
+---
+
+## Technical Skill
+
+- **Advanced Web Audio API:** Uses `AudioContext`, `StereoPannerNode`, and dynamically controlled oscillators to create real-time directional audio feedback.
+- **Modern JavaScript (ES6):** Includes classes, arrow functions, `const`/`let`, and Promises throughout the frontend.
+- **Django Best Practices:** Implements class-based views, `LoginRequiredMixin` for authentication, `reverse_lazy` for URL management, and Django’s ORM for database interactions.
+- **Accessibility (ARIA):** Uses ARIA roles and live regions (`aria-live="polite"`) to ensure screen reader users receive real-time feedback.
+
+---
 
 ## Core Features
 
-*   **Business Dashboard:** A secure, login-protected area for businesses to manage their audio descriptions.
-*   **Product & Folder Management:** Users can create products, organize them into folders, and edit or delete them.
-*   **Drag-and-Drop Interface:** An intuitive drag-and-drop system for organizing products into folders.
-*   **Template System:** Businesses can create reusable templates to standardize their product descriptions.
-*   **Automatic QR Code Generation:** QR codes are generated and saved automatically upon product creation.
-*   **Directional Audio Beacon Scanner:** A "scan mode" that uses spatial audio to help blind users locate QR codes.
-*   **Automatic Text-to-Speech:** Product descriptions are read aloud automatically when a QR code is scanned.
+- Secure, login-protected business dashboard  
+- Product and folder management  
+- Drag-and-drop organization interface  
+- Reusable templates for product descriptions  
+- Automatic QR code generation  
+- Directional audio QR scanner designed for blind users  
+
+---
+
+## Summary
+
+This project demonstrates how thoughtful design and strong technical implementation can work together to remove real-world accessibility barriers. By prioritizing an audio-first experience and leveraging modern web technologies, the application provides a practical and inclusive solution for visually impaired users.
