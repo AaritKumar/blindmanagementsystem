@@ -120,9 +120,6 @@
     transition: transform 0.3s;
 }
 
-.folder-header.open .folder-toggle-icon {
-    transform: rotate(90deg);
-}
 
 .folder-content {
     max-height: 0;
@@ -298,4 +295,28 @@
     width: 100%;
     height: auto;
     display: block;
+}
+
+/* --- Icon Styling --- */
+.folder-toggle-icon .folder-open {
+    display: none;
+}
+
+.btn-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    transition: transform 0.2s;
+}
+
+.btn-icon:hover svg {
+    transform: scale(1.1);
+}
+
+.folder-header.open .folder-toggle-icon .folder-closed {
+    display: none;
+}
+
+.folder-header.open .folder-toggle-icon .folder-open {
+    display: inline;
 }
