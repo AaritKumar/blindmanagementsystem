@@ -1,83 +1,38 @@
-<h2>Create New Audio Label</h2>
-<style>
-    .create-tabs {
-        display: flex;
-        margin-bottom: 20px;
-    }
-    .create-tab-link {
-        padding: 10px 20px;
-        cursor: pointer;
-        border: 1px solid #98c1d9; /* Light Blue */
-        background-color: #f8f9fa;
-        color: #3d5a80; /* Medium Blue */
-        border-radius: 5px;
-        margin-right: 10px;
-    }
-    .create-tab-link.selected {
-        background-color: #3d5a80; /* Medium Blue */
-        color: #fff;
-        border-color: #3d5a80;
-    }
-</style>
-
-<div class="create-tabs">
-    <button class="create-tab-link selected" onclick="openCreateTab(event, 'custom')">Custom</button>
-    <button class="create-tab-link" onclick="openCreateTab(event, 'template')">Template</button>
-</div>
-
-<div id="custom" class="create-tab-content active">
-    <form method="post" action="{% url 'product_create' %}">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="id_name">Name:</label>
-            <input type="text" name="name" id="id_name" required>
-        </div>
-        <div class="form-group">
-            <label for="id_text_description">Description:</label>
-            <textarea name="text_description" id="id_text_description" required></textarea>
-        </div>
-        <button type="button" id="preview-btn" class="btn">Preview Audio</button>
-        <button type="submit" class="btn">Create</button>
-    </form>
-</div>
-
-<div id="template" class="create-tab-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <input type="text" id="template-search" class="form-group" placeholder="Search templates..." style="width: calc(100% - 80px); margin: 0;">
-        <button id="template-fab" class="btn">+</button>
+<div class="create-section">
+    <div class="create-tabs">
+        <button class="create-tab-link active" data-tab="custom">Custom</button>
+        <button class="create-tab-link" data-tab="template">From Template</button>
     </div>
-    <ul id="template-list" style="list-style: none; padding: 0;">
-        {% for template in templates %}
-            <li><a href="{% url 'use_template' template.pk %}">{{ template.name }}</a></li>
-        {% endfor %}
-    </ul>
+
+    <div id="custom" class="create-tab-content active">
+        <h3>Create a New Audio Label</h3>
+        <form method="post" action="{% url 'product_create' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_name">Name</label>
+                <input type="text" name="name" id="id_name" required>
+            </div>
+            <div class="form-group">
+                <label for="id_text_description">Description</label>
+                <textarea name="text_description" id="id_text_description" required></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="custom-preview-btn" class="btn btn-secondary">Preview Audio</button>
+                <button type="submit" class="btn">Create Product</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="template" class="create-tab-content">
+        <h3>Create from a Template</h3>
+        <div class="template-controls">
+            <input type="text" id="template-search" placeholder="Search templates...">
+            <button id="show-template-modal-btn" class="btn btn-secondary">+</button>
+        </div>
+        <ul id="template-list">
+            {% for template in templates %}
+                <li><a href="{% url 'use_template' template.pk %}">{{ template.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
-
-<script>
-    document.getElementById('preview-btn').addEventListener('click', () => {
-        const text = document.getElementById('id_text_description').value;
-        if (text && 'speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 0.8;
-            window.speechSynthesis.speak(utterance);
-        }
-    });
-
-    function openCreateTab(evt, tabName) {
-        var i, tabcontent, tablinks;
-        tabcontent = document.getElementsByClassName("create-tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
-        }
-        tablinks = document.getElementsByClassName("create-tab-link");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" selected", "");
-        }
-        document.getElementById(tabName).style.display = "block";
-        evt.currentTarget.className += " selected";
-    }
-    // Set the default tab to be visible
-    document.getElementById('custom').style.display = "block";
-    document.getElementById('template').style.display = "none";
-</script>
-

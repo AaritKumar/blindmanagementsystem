@@ -1,10 +1,24 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Product{% endblock %}
 
 {% block content %}
-  <h2>Edit Audio Label</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn">Save Changes</button>
-  </form>
+    <a href="{% url 'dashboard' %}" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>
+        Back to Dashboard
+    </a>
+    <h2>Edit: {{ form.instance.name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_name">Name</label>
+            {{ form.name }}
+        </div>
+        <div class="form-group">
+            <label for="id_text_description">Text Description</label>
+            {{ form.text_description }}
+        </div>
+        <button type="submit" class="btn">Save Changes</button>
+    </form>
 {% endblock %}

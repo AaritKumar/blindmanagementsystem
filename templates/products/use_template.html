@@ -1,80 +1,77 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create from Template{% endblock %}
 
 {% block content %}
-<h2>Create from Template: {{ template.name }}</h2>
-<form method="post" action="{% url 'product_create' %}">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="id_name">Name:</label>
-        <input type="text" name="name" id="id_name" value="{{ template.name }}" required>
-    </div>
-    
-    <div id="template-form-container" class="form-group">
-        <!-- Dynamic form fields will be generated here -->
-    </div>
-    
-    <textarea name="text_description" id="id_text_description" style="display:none;"></textarea>
-    
-    <div class="form-group">
-        <button type="button" id="preview-btn" class="btn">Preview Audio</button>
-        <button type="submit" class="btn">Create</button>
-    </div>
-</form>
-
-<script>
-    const templateContent = "{{ template.content|escapejs }}";
-    const container = document.getElementById('template-form-container');
-    const finalDescription = document.getElementById('id_text_description');
-    
-    // Part 1: Build the visual form for the user.
-    const displayHtml = templateContent
-        .replace(/\\r/g, '') // Remove carriage returns for display
-        .replace(/\\n/g, '<br>') // Preserve line breaks visually
-        .replace(/(\[blank\]\[(.*?)\])/g, (match, p1, p2) => {
-            return `<input type="text" placeholder="${p2}" class="template-input form-group" style="margin: 5px 0;">`;
-        });
-    container.innerHTML = displayHtml;
-
-    // Part 2: Build the raw description string for the server to process.
-    function updateFinalDescription() {
-        const inputs = Array.from(container.querySelectorAll('.template-input'));
-        let inputIndex = 0;
+    <a href="{% url 'dashboard' %}?tab=create" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>
+        Back
+    </a>
+    <h2>Create from Template: {{ template.name }}</h2>
+    <form method="post" action="{% url 'product_create' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_name">Name:</label>
+            <input type="text" name="name" id="id_name" value="{{ template.name }}" required>
+        </div>
         
-        let rawContent = templateContent.replace(/(\[blank\]\[.*?\])/g, () => {
-            const value = inputs[inputIndex] ? inputs[inputIndex].value : '';
-            inputIndex++;
-            // Re-escape backslashes in the user's input to prevent them from breaking the final string.
-            return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-        });
+        <div id="template-form-container" class="form-group">
+            <!-- Dynamic form fields will be generated here -->
+        </div>
         
-        // The raw string, complete with escape sequences, is sent to the server.
-        finalDescription.value = rawContent;
-    }
-    
-    // Update the hidden textarea before form submission.
-    container.addEventListener('input', updateFinalDescription);
-    document.querySelector('form').addEventListener('submit', updateFinalDescription);
+        <textarea name="text_description" id="id_text_description" style="display:none;"></textarea>
+        
+        <div class="form-group">
+            <button type="button" id="preview-btn" class="btn">Preview Audio</button>
+            <button type="submit" class="btn">Create</button>
+        </div>
+    </form>
 
-    // Wire up the preview button.
-    document.getElementById('preview-btn').addEventListener('click', () => {
-        updateFinalDescription();
-        try {
-            // To correctly preview, we must un-escape the string on the client-side.
-            // The safest way is to treat it as a JSON string, which handles all escape sequences.
-            const textToSpeak = JSON.parse(`"${finalDescription.value}"`);
+    <script>
+        const templateContent = "{{ template.content|escapejs }}";
+        const container = document.getElementById('template-form-container');
+        const finalDescription = document.getElementById('id_text_description');
+        
+        const displayHtml = templateContent
+            .replace(/\\r/g, '')
+            .replace(/\\n/g, '<br>')
+            .replace(/(\[blank\]\[(.*?)\])/g, (match, p1, p2) => {
+                return `<input type="text" placeholder="${p2}" class="template-input form-group" style="margin: 5px 0;">`;
+            });
+        container.innerHTML = displayHtml;
+
+        function updateFinalDescription() {
+            const inputs = Array.from(container.querySelectorAll('.template-input'));
+            let inputIndex = 0;
             
-            if (textToSpeak && 'speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            let rawContent = templateContent.replace(/(\[blank\]\[.*?\])/g, () => {
+                const value = inputs[inputIndex] ? inputs[inputIndex].value : '';
+                inputIndex++;
+                return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+            });
+            
+            finalDescription.value = rawContent;
+        }
+        
+        container.addEventListener('input', updateFinalDescription);
+        document.querySelector('form').addEventListener('submit', updateFinalDescription);
+
+        document.getElementById('preview-btn').addEventListener('click', () => {
+            updateFinalDescription();
+            try {
+                const textToSpeak = JSON.parse(`"${finalDescription.value}"`);
+                if (textToSpeak && 'speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    utterance.rate = 0.8;
+                    window.speechSynthesis.speak(utterance);
+                }
+            } catch (e) {
+                console.error("Error parsing string for preview:", e);
+                const utterance = new SpeechSynthesisUtterance(finalDescription.value);
                 utterance.rate = 0.8;
                 window.speechSynthesis.speak(utterance);
             }
-        } catch (e) {
-            console.error("Error parsing string for preview:", e);
-            // Fallback for safety in case of a parsing error.
-            const utterance = new SpeechSynthesisUtterance(finalDescription.value);
-            utterance.rate = 0.8;
-            window.speechSynthesis.speak(utterance);
-        }
-    });
-</script>
+        });
+    </script>
 {% endblock %}

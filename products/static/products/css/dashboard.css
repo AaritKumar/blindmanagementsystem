@@ -1,45 +1,60 @@
+/* dashboard.css */
+
+/* --- Main Dashboard Tabs --- */
 .tabs {
     display: flex;
-    border-bottom: 2px solid #ccc;
+    border-bottom: 2px solid #e0fbfc;
+    margin-bottom: 30px;
 }
+
 .tab-link {
-    padding: 10px 20px;
+    padding: 15px 25px;
     cursor: pointer;
     border: none;
     background: none;
     font-size: 1.2em;
-    border-bottom: 2px solid transparent;
+    color: #3d5a80;
+    position: relative;
+    top: 2px;
 }
+
 .tab-link.active {
-    border-bottom: 2px solid #005fcc;
+    border-bottom: 2px solid #ee6c4d;
     font-weight: bold;
+    color: #293241;
 }
+
 .tab-content {
     display: none;
-    padding: 20px;
 }
+
 .tab-content.active {
     display: block;
 }
+
+/* --- Catalog Grid --- */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
 }
+
 .grid-item {
-    border: 1px solid #98c1d9; /* Light Blue */
+    border: 1px solid #e0fbfc;
     padding: 15px;
     text-align: center;
-    border-radius: 8px;
+    border-radius: 12px;
     background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     transition: transform 0.2s, box-shadow 0.2s;
-    word-wrap: break-word; /* Ensure long names don't break layout */
+    word-wrap: break-word;
 }
+
 .grid-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
+
 .item-actions {
     margin-top: 15px;
     opacity: 0;
@@ -49,36 +64,152 @@
     align-items: center;
     gap: 10px;
 }
+
 .grid-item:hover .item-actions {
     opacity: 1;
 }
+
 .btn-icon {
     background: none;
     border: none;
     cursor: pointer;
     font-size: 1.5em;
-    margin: 0 8px;
-    color: #3d5a80; /* Medium Blue */
+    padding: 5px;
+    color: #3d5a80;
     transition: color 0.2s;
 }
+
 .btn-icon:hover {
-    color: #ee6c4d; /* Orange */
+    color: #ee6c4d;
 }
+
 .btn-icon svg {
     width: 24px;
     height: 24px;
-    fill: #3d5a80; /* Medium Blue */
-    transition: fill 0.2s;
+    fill: currentColor;
 }
-.btn-icon:hover svg {
-    fill: #ee6c4d; /* Orange */
+
+/* --- Folders --- */
+.folder-section {
+    margin-bottom: 30px;
 }
-.folder-icon {
+
+.folder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #e0fbfc;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.folder-header > span {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+
+.folder-toggle-icon, .folder-icon {
     width: 24px;
     height: 24px;
     margin-right: 10px;
-    fill: #3d5a80; /* Medium Blue */
+    fill: #3d5a80;
+    transition: transform 0.3s;
 }
+
+.folder-header.open .folder-toggle-icon {
+    transform: rotate(90deg);
+}
+
+.folder-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    padding: 0 15px;
+}
+
+/* --- Create Section --- */
+.create-section {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.create-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.create-tab-link {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid #98c1d9;
+    background-color: #f8f9fa;
+    color: #3d5a80;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+.create-tab-link.active {
+    background-color: #3d5a80;
+    color: #fff;
+    border-color: #3d5a80;
+}
+
+.create-tab-content {
+    display: none;
+}
+
+.create-tab-content.active {
+    display: block;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.template-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#template-search {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid #98c1d9;
+    border-radius: 5px;
+}
+
+#template-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#template-list li a {
+    display: block;
+    padding: 15px;
+    text-decoration: none;
+    color: #3d5a80;
+    border: 1px solid #e0fbfc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+#template-list li a:hover {
+    background-color: #e0fbfc;
+    border-color: #98c1d9;
+}
+
+
+/* --- Floating Action Button & Modals --- */
 .fab {
     position: fixed;
     bottom: 40px;
@@ -86,7 +217,7 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: #ee6c4d; /* Orange */
+    background-color: #ee6c4d;
     color: white;
     font-size: 2em;
     border: none;
@@ -94,9 +225,11 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     transition: transform 0.2s;
 }
+
 .fab:hover {
     transform: scale(1.1);
 }
+
 .modal {
     display: none;
     position: fixed;
@@ -107,74 +240,36 @@
     height: 100%;
     overflow: auto;
     background-color: rgba(0,0,0,0.5);
-}
-.folder-section {
-    margin-bottom: 30px;
-}
-.folder-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    cursor: pointer;
-    padding: 15px;
-    background-color: #fff;
-    border: 1px solid #98c1d9; /* Light Blue */
-    border-radius: 8px;
-    margin-bottom: 15px;
+    justify-content: center;
 }
-.folder-header h3 {
-    margin: 0;
-    color: #293241; /* Dark Blue */
-    display: flex;
-    align-items: center;
-}
-.folder-toggle-icon {
-    width: 24px;
-    height: 24px;
-    fill: #3d5a80; /* Medium Blue */
-    transition: transform 0.3s;
-    margin-right: 10px;
-}
-.folder-header.open .folder-toggle-icon {
-    transform: rotate(90deg);
-}
-.folder-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 0 15px;
-}
-.folder-header.open + .folder-content {
-    max-height: 1000px; /* Adjust as needed */
-    padding: 15px;
-}
-.folder-header.open .folder-toggle-icon {
-    transform: rotate(90deg);
-}
+
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
     max-width: 500px;
+    position: relative;
 }
+
 .close-button {
     color: #aaa;
-    float: right;
+    position: absolute;
+    top: 15px;
+    right: 15px;
     font-size: 28px;
     font-weight: bold;
-}
-.close-button:hover,
-.close-button:focus {
-    color: black;
-    text-decoration: none;
     cursor: pointer;
 }
 
-/* Styles for the new Instructions Tab */
+.close-button:hover,
+.close-button:focus {
+    color: black;
+}
+
+
+/* --- Instructions Tab --- */
 .instructions-container {
     display: flex;
     gap: 30px;
@@ -183,7 +278,7 @@
 
 .instructions-column {
     flex: 1;
-    min-width: 0; /* Prevents flex items from overflowing */
+    min-width: 0;
 }
 
 .instructions-column h3 {
@@ -196,7 +291,7 @@
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    overflow: hidden; /* Ensures the image respects the border-radius */
+    overflow: hidden;
 }
 
 .instruction-image img {

@@ -1,3 +1,5 @@
+/* static/css/main.css */
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6;
@@ -110,6 +112,13 @@ h1, h2, h3 {
     opacity: 1;
 }
 
+.choice-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 50px;
+}
+
 .choice-btn {
     font-size: 2em;
     padding: 40px 0;
@@ -127,9 +136,23 @@ h1, h2, h3 {
     color: #fff;
 }
 
-.choice-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 50px;
+.back-link {
+    display: inline-block;
+    margin-bottom: 25px;
+    font-weight: bold;
+    color: #3d5a80;
+    text-decoration: none;
+    font-size: 1em;
+}
+
+.back-link:hover {
+    color: #ee6c4d;
+}
+
+.back-link svg {
+    vertical-align: middle;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    fill: currentColor;
 }
