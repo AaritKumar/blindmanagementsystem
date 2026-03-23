@@ -18,9 +18,9 @@
 }
 
 .tab-link.active {
-    border-bottom: 2px solid var(--tangerine-dream);
+    border-bottom: 2px solid var(--tomato-jam);
     font-weight: bold;
-    color: var(--tangerine-dream);
+    color: var(--yale-blue);
 }
 
 .tab-content {
@@ -57,7 +57,7 @@
 .grid-item:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    border-color: var(--tangerine-dream);
+    border-color: var(--tomato-jam);
 }
 
 .item-actions {
@@ -85,7 +85,7 @@
 }
 
 .btn-icon:hover {
-    color: var(--tangerine-dream);
+    color: var(--tomato-jam);
 }
 
 .btn-icon svg {
@@ -155,9 +155,9 @@
 }
 
 .create-tab-link.active {
-    background-color: var(--tangerine-dream);
+    background-color: var(--yale-blue);
     color: #fff;
-    border-color: var(--tangerine-dream);
+    border-color: var(--yale-blue);
     font-weight: bold;
 }
 
@@ -209,7 +209,7 @@
 
 #template-list li a:hover {
     background-color: #ffffff;
-    border-color: var(--tangerine-dream);
+    border-color: var(--tomato-jam);
 }
 
 /* --- Floating Action Button & Modals --- */
@@ -220,7 +220,7 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: var(--tangerine-dream);
+    background-color: var(--tomato-jam);
     color: #fff;
     font-size: 2em;
     border: none;
@@ -362,7 +362,7 @@
 }
 
 .error-message {
-    color: #c00;
+    color: var(--tomato-jam);
     font-size: 0.9em;
     margin-top: 5px;
 }

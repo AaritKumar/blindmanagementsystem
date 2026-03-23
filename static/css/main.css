@@ -2,13 +2,13 @@
 
 :root {
     --yale-blue: #08415C;
-    --honeydew: #E5F4E3;
-    --tangerine-dream: #FAA381;
+    --tomato-jam: #CC2936;
+    --alabaster-grey: #E7E5DF;
 
     --background-light: #FFFFFF;
     --text-dark: #212529;
     --text-medium: #495057;
-    --border-light: #DEE2E6;
+    --border-light: #d8d6d0;
 }
 
 body {
@@ -16,7 +16,7 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 40px 20px;
-    background-color: var(--honeydew);
+    background-color: var(--alabaster-grey);
     color: var(--text-dark);
 }
 
@@ -47,7 +47,7 @@ nav a {
 }
 
 nav a:hover {
-    color: var(--tangerine-dream);
+    color: var(--tomato-jam);
 }
 
 h1, h2, h3 {
@@ -79,7 +79,7 @@ h1, h2, h3 {
 .btn {
     display: inline-block;
     padding: 12px 20px;
-    background: var(--tangerine-dream);
+    background: var(--tomato-jam);
     color: #fff;
     border: 0;
     border-radius: 5px;
@@ -90,7 +90,7 @@ h1, h2, h3 {
 }
 
 .btn:hover {
-    background-color: #e59071; /* Darker tangerine */
+    background-color: #b3242f; /* Darker red */
 }
 
 .btn-secondary {
@@ -115,7 +115,7 @@ h1, h2, h3 {
 }
 
 .btn-link:hover {
-    color: var(--tangerine-dream);
+    color: var(--tomato-jam);
 }
 
 .skip-link {
@@ -147,14 +147,14 @@ h1, h2, h3 {
     width: 250px;
     text-align: center;
     text-decoration: none;
-    border: 2px solid var(--tangerine-dream);
+    border: 2px solid var(--tomato-jam);
     border-radius: 10px;
-    color: var(--tangerine-dream);
+    color: var(--tomato-jam);
     transition: background-color 0.3s, color 0.3s;
 }
 
 .choice-btn:hover {
-    background-color: var(--tangerine-dream);
+    background-color: var(--tomato-jam);
     color: #fff;
 }
 
@@ -168,7 +168,7 @@ h1, h2, h3 {
 }
 
 .back-link:hover {
-    color: var(--tangerine-dream);
+    color: var(--tomato-jam);
 }
 
 .back-link svg {

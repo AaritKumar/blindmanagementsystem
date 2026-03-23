@@ -43,6 +43,6 @@
 }
 
 .auth-links a:hover {
-    color: var(--tangerine-dream);
+    color: var(--tomato-jam);
     text-decoration: underline;
 }
