@@ -1,94 +1,48 @@
 /* static/css/auth.css */
 
 .auth-container {
-    max-width: 450px;
+    max-width: 400px;
     margin: 50px auto;
     padding: 40px;
-    background-color: #fff;
+    background-color: var(--background-light);
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
 }
 
-.auth-container h1 {
-    color: #293241; /* Darkest Blue */
-    margin-bottom: 15px;
-    font-size: 2.5em;
+.auth-container h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--yale-blue);
 }
 
 .auth-container p {
-    color: #3d5a80; /* Medium Blue */
+    text-align: center;
     margin-bottom: 30px;
+    color: var(--text-medium);
 }
 
-.auth-form .form-group {
-    text-align: left;
-    margin-bottom: 20px;
-}
-
-.auth-form .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #3d5a80;
-}
-
-.auth-form .form-group input {
-    width: 100%;
-    padding: 15px;
-    border: 1px solid #98c1d9; /* Light Blue */
-    border-radius: 8px;
-    font-size: 1em;
-    box-sizing: border-box;
-    transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.auth-form .form-group input:focus {
-    outline: none;
-    border-color: #3d5a80; /* Medium Blue */
-    box-shadow: 0 0 0 3px rgba(61, 90, 128, 0.2);
-}
-
-.auth-form .remember-me {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+.auth-container .form-group {
     margin-bottom: 25px;
-    font-size: 0.9em;
 }
 
-.auth-form .remember-me input {
-    margin-right: 10px;
-}
-
-.auth-submit-btn {
+.auth-container .btn {
     width: 100%;
     padding: 15px;
-    font-size: 1.2em;
-    font-weight: bold;
-    background-color: #ee6c4d; /* Orange */
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    font-size: 1.1em;
 }
 
-.auth-submit-btn:hover {
-    background-color: #d85a3a; /* Darker Orange */
+.auth-links {
+    text-align: center;
+    margin-top: 20px;
 }
 
-.auth-switch-link {
-    margin-top: 30px;
-    font-size: 0.9em;
-}
-
-.auth-switch-link a {
-    color: #ee6c4d; /* Orange */
+.auth-links a {
+    color: var(--yale-blue);
     text-decoration: none;
     font-weight: bold;
 }
 
-.auth-switch-link a:hover {
+.auth-links a:hover {
+    color: var(--tangerine-dream);
     text-decoration: underline;
 }
