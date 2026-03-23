@@ -369,3 +369,11 @@
     margin-top: 5px;
 }
 
+.char-counter {
+    display: block;
+    text-align: right;
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 5px;
+}
+

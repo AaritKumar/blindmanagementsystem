@@ -54,7 +54,23 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
 
         form.instance.owner = self.request.user
         response = super().form_valid(form)
-        QRCode.objects.create(linked_product=self.object)
+        
+        qr_code = QRCode.objects.create(linked_product=self.object)
+
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'ok',
+                'product': {
+                    'pk': self.object.pk,
+                    'name': self.object.name,
+                    'text_description': self.object.text_description,
+                    'image_data': qr_code.image_data,
+                    'filename': qr_code.get_filename(),
+                    'edit_url': reverse_lazy('product_edit', kwargs={'pk': self.object.pk}),
+                    'delete_url': reverse_lazy('product_delete', kwargs={'pk': self.object.pk}),
+                }
+            })
+            
         return response
 
 
