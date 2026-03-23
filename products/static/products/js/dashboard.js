@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
             this.initFolderToggles();
             this.handleUrlParams();
             this.initTemplateCreation();
+            this.initFolderCreation();
+            this.initFormValidation();
+            this.initTemplateSearch();
         }
 
         initTabs() {
@@ -63,8 +66,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         initDragAndDrop() {
             document.querySelectorAll('.grid-container').forEach(grid => {
-                new Sortable(grid, { group: 'shared', animation: 150, onEnd: (evt) => this.handleDrop(evt) });
+                this.initSingleDragAndDrop(grid);
             });
+        }
+
+        initSingleDragAndDrop(grid) {
+            new Sortable(grid, { group: 'shared', animation: 150, onEnd: (evt) => this.handleDrop(evt) });
         }
 
         handleDrop(evt) {
@@ -112,13 +119,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         initFolderToggles() {
             document.querySelectorAll('.folder-header').forEach(header => {
-                header.addEventListener('click', (event) => {
-                    if (!event.target.closest('.folder-actions')) {
-                        header.classList.toggle('open');
-                        const content = header.nextElementSibling;
-                        content.style.maxHeight = content.style.maxHeight ? null : `${content.scrollHeight}px`;
-                    }
-                });
+                this.initSingleFolderToggle(header);
+            });
+        }
+
+        initSingleFolderToggle(header) {
+            header.addEventListener('click', (event) => {
+                if (!event.target.closest('.folder-actions')) {
+                    const isOpen = header.classList.toggle('open');
+                    header.setAttribute('aria-expanded', isOpen);
+                    const content = header.nextElementSibling;
+                    content.style.maxHeight = content.style.maxHeight ? null : `${content.scrollHeight}px`;
+                }
             });
         }
         
@@ -129,6 +141,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         initTemplateCreation() {
             const form = document.getElementById('template-creation-form');
+            if (!form) return;
+
             form.addEventListener('submit', (event) => {
                 event.preventDefault();
                 const formData = new FormData(form);
@@ -136,27 +150,187 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetch(form.action, {
                     method: 'POST',
                     body: formData,
-                    headers: { 'X-CSRFToken': this.csrfToken }
+                    headers: { 'X-CSRFToken': this.csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'ok') {
                         const templateList = document.getElementById('template-list');
+                        const newLi = document.createElement('li');
                         const newLink = document.createElement('a');
                         newLink.href = data.url;
                         newLink.textContent = data.name;
-                        const newLi = document.createElement('li');
                         newLi.appendChild(newLink);
-                        templateList.appendChild(newLi);
+                        
+                        const noResults = templateList.querySelector('.no-results');
+                        if(noResults) {
+                            templateList.insertBefore(newLi, noResults);
+                        } else {
+                            templateList.appendChild(newLi);
+                        }
                         
                         form.reset();
                         document.getElementById('template-modal').style.display = 'none';
+                        // After adding a new template, re-init the search list
+                        this.initTemplateSearch();
                     } else {
-                        alert('Error creating template: ' + data.message);
+                        alert('Error creating template: ' + (data.message || 'Unknown error'));
                     }
                 });
             });
         }
+
+        initFolderCreation() {
+            const form = document.getElementById('folder-creation-form');
+            if (!form) return;
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData(form);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 
+                        'X-CSRFToken': this.csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest' 
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        this.addNewFolderToDOM(data.folder);
+                        form.reset();
+                        document.getElementById('folder-modal').style.display = 'none';
+                    } else {
+                        alert('Error creating folder.');
+                    }
+                });
+            });
+        }
+
+        addNewFolderToDOM(folder) {
+            const folderContainer = document.querySelector('#catalog'); // A bit simplistic, might need a more specific container
+            const newFolderSection = document.createElement('div');
+            newFolderSection.className = 'folder-section';
+            newFolderSection.innerHTML = `
+                <h3 class="folder-header" data-folder-id="${folder.pk}" aria-expanded="false" aria-controls="folder-content-${folder.pk}">
+                    <span>
+                        <svg class="folder-toggle-icon" viewBox="0 0 24 24"><path class="folder-closed" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/><path class="folder-open" d="M19 13H5v-2h14v2z"/></svg>
+                        <svg class="folder-icon" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"></path></svg>
+                        ${folder.name}
+                    </span>
+                    <div class="folder-actions">
+                        <a href="${folder.edit_url}" class="btn-icon" title="Edit Folder">
+                            <svg class="icon-edit" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>
+                            <span class="sr-only">Edit Folder</span>
+                        </a>
+                        <form method="post" action="${folder.delete_url}" style="display:inline;">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="${this.csrfToken}">
+                            <button type="submit" class="btn-icon" title="Delete Folder" onclick="return confirm('Are you sure you want to delete this folder? All products inside will be moved to Uncategorized.');">
+                                <svg class="icon-delete" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>
+                                <span class="sr-only">Delete Folder</span>
+                            </button>
+                        </form>
+                    </div>
+                </h3>
+                <div class="folder-content" id="folder-content-${folder.pk}">
+                    <div class="grid-container folder-grid" id="folder-${folder.pk}" data-folder-id="${folder.pk}">
+                        <!-- New products for this folder can be dropped here -->
+                    </div>
+                </div>
+            `;
+            
+            // Find the uncategorized section to insert before it
+            const uncategorizedSection = Array.from(document.querySelectorAll('.folder-section h3')).find(h3 => h3.textContent.trim() === 'Uncategorized');
+            if (uncategorizedSection) {
+                folderContainer.insertBefore(newFolderSection, uncategorizedSection.parentElement);
+            } else {
+                folderContainer.appendChild(newFolderSection);
+            }
+
+            // Re-initialize toggles and drag-and-drop for the new folder
+            this.initSingleFolderToggle(newFolderSection.querySelector('.folder-header'));
+            this.initSingleDragAndDrop(newFolderSection.querySelector('.grid-container'));
+        }
+
+        initFormValidation() {
+            const productForm = document.querySelector('#product-creation-form');
+            if (!productForm) return;
+
+            productForm.setAttribute('novalidate', true);
+
+            productForm.addEventListener('submit', (event) => {
+                const name = document.getElementById('id_name');
+                const description = document.getElementById('id_text_description');
+                let isValid = true;
+
+                if (name.value.trim() === '') {
+                    this.showError(name, 'Product name is required.');
+                    isValid = false;
+                } else {
+                    this.showError(name, null);
+                }
+
+                if (description.value.trim() === '') {
+                    this.showError(description, 'Text description is required.');
+                    isValid = false;
+                } else {
+                    this.showError(description, null);
+                }
+
+                if (!isValid) {
+                    event.preventDefault();
+                }
+            });
+        }
+
+        showError(field, message) {
+            let error = field.parentElement.querySelector('.error-message');
+            if (!error) {
+                error = document.createElement('div');
+                error.className = 'error-message';
+                field.parentElement.appendChild(error);
+            }
+            error.textContent = message;
+            error.style.display = message ? 'block' : 'none';
+        }
+
+        initTemplateSearch() {
+            const searchInput = document.getElementById('template-search');
+            const templateList = document.getElementById('template-list');
+            if (!searchInput || !templateList) return;
+
+            const listItems = Array.from(templateList.getElementsByTagName('li'));
+
+            let noResultsMessage = templateList.querySelector('.no-results');
+            if (!noResultsMessage) {
+                noResultsMessage = document.createElement('li');
+                noResultsMessage.className = 'no-results';
+                noResultsMessage.textContent = 'No templates found.';
+                noResultsMessage.style.display = 'none';
+                templateList.appendChild(noResultsMessage);
+            }
+
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                let visibleCount = 0;
+
+                listItems.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    const isVisible = text.includes(searchTerm);
+                    item.style.display = isVisible ? '' : 'none';
+                    if (isVisible) {
+                        visibleCount++;
+                    }
+                });
+
+                noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+            });
+        }
+
+
+
     }
 
     new Dashboard(dashboardConfig);

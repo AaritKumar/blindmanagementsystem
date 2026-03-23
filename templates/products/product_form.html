@@ -6,7 +6,7 @@
 
     <div id="custom" class="create-tab-content active">
         <h3>Create a New Audio Label</h3>
-        <form method="post" action="{% url 'product_create' %}">
+        <form method="post" action="{% url 'product_create' %}" id="product-creation-form">
             {% csrf_token %}
             <div class="form-group">
                 <label for="id_name">Name</label>

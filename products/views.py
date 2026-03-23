@@ -4,7 +4,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
@@ -85,7 +85,18 @@ class FolderCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        super().form_valid(form)
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'ok',
+                'folder': {
+                    'pk': self.object.pk,
+                    'name': self.object.name,
+                    'edit_url': reverse_lazy('folder_edit', kwargs={'pk': self.object.pk}),
+                    'delete_url': reverse_lazy('folder_delete', kwargs={'pk': self.object.pk})
+                }
+            })
+        return redirect(self.get_success_url())
 
 
 class FolderUpdateView(LoginRequiredMixin, UpdateView):
@@ -108,6 +119,16 @@ class TemplateCreateView(LoginRequiredMixin, CreateView):
     model = Template
     fields = ['name', 'content']
     
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'ok',
+                'name': self.object.name,
+                'url': reverse_lazy('use_template', kwargs={'template_id': self.object.pk})
+            })
+        return response
+
     def get_success_url(self):
         return f"{reverse_lazy('dashboard')}?tab=create"
 

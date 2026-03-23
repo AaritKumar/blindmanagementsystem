@@ -320,3 +320,52 @@
 .folder-header.open .folder-toggle-icon .folder-open {
     display: inline;
 }
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .tabs {
+        font-size: 0.9em;
+    }
+
+    .tab-link {
+        padding: 10px 15px;
+    }
+
+    .grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .folder-header {
+        padding: 10px;
+    }
+
+    .instructions-container {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+
+    .fab {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5em;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
+}
+
+.error-message {
+    color: #ee6c4d;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
