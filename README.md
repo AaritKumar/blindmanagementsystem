@@ -1,68 +1,150 @@
-# Accessible QR Audio Generator
+# BMS — Blind Management System
 
-This project is a Django-based web application built to improve accessibility for visually impaired users by connecting physical products to clear, immediate audio information. Businesses can generate QR codes that, when scanned, automatically play a text-to-speech audio description of a product—no screens or extra interaction required.
-
-The idea behind this project came from a desire to remove everyday barriers faced by blind users. Rather than treating accessibility as an add-on, the entire application was designed around an audio-first experience. While the project was developed with an academic rubric in mind, the main goal was to create something genuinely useful, thoughtful, and technically strong.
+> **Accessible QR Audio Generator** — A web application that turns QR codes into an audio-first experience for visually impaired users.
 
 ---
 
-## Design Approach
+## Overview
 
-This project was intentionally designed to go beyond basic functionality. Each major feature reflects a balance of creativity, solid coding practices, architectural complexity, and technical skill.
-
----
-
-## Creativity
-
-### Directional Audio Beacon
-
-One of the biggest challenges for blind users is locating a QR code in the first place. Most scanners give no feedback until the code is already centered. To solve this, the scanner includes a directional audio beacon built with the Web Audio API.
-
-When a QR code enters the camera’s view, a soft beep begins playing. The sound pans left or right in the user’s headphones based on where the QR code is positioned on the screen, helping guide the user toward it. As the QR code gets closer, the beep increases in frequency, similar to a Geiger counter. This turns scanning into a guided, intuitive process instead of trial and error.
-
-### Audio-First Workflow
-
-The experience is designed to be as hands-free as possible. The camera activates automatically, the beacon guides the user, the QR code is read without manual input, and the product description is spoken aloud immediately. Afterward, the app can return to scanning mode for the next product, reducing cognitive load and unnecessary interaction.
+BMS allows businesses to generate QR codes embedded with spoken audio descriptions. Visually impaired users can scan these codes to hear product information, menus, or public notices — no sight required.
 
 ---
 
-## Software Coding Practices
+## Problem
 
-- **Separation of Concerns:** All CSS and JavaScript are stored in external static files, improving readability, maintainability, and performance.
-- **Object-Oriented JavaScript:** Frontend logic is organized into ES6 classes such as `Dashboard`, `QRScanner`, and `DirectionalBeacon`, keeping responsibilities clearly defined.
-- **Purposeful Commenting:** Comments explain the reasoning behind non-trivial logic, especially in Django views, model methods, and complex frontend code.
-- **Clear Documentation:** This README reflects intentional design choices and clearly communicates how and why the system works.
+For visually impaired people, everyday tasks like reading a menu, understanding a product label, or accessing public information can be frustrating and inaccessible. Tools designed to increase convenience — digital labels, QR codes, quick-access systems — rely almost entirely on visual elements, unintentionally excluding those who can't see.
 
----
-
-## Complexity
-
-- **Django MVT Architecture:** The project follows Django’s Model-View-Template pattern, cleanly separating data, logic, and presentation.
-- **Meaningful Abstractions:** Complex functionality is broken into reusable components. For example, the `DirectionalBeacon` class encapsulates Web Audio API logic, keeping the QR scanner simple and modular.
-- **RESTful Communication:** A lightweight API endpoint supports drag-and-drop interactions on the dashboard, allowing dynamic updates without full page reloads.
+**BMS removes these barriers.**
 
 ---
 
-## Technical Skill
+## Solution
 
-- **Advanced Web Audio API:** Uses `AudioContext`, `StereoPannerNode`, and dynamically controlled oscillators to create real-time directional audio feedback.
-- **Modern JavaScript (ES6):** Includes classes, arrow functions, `const`/`let`, and Promises throughout the frontend.
-- **Django Best Practices:** Implements class-based views, `LoginRequiredMixin` for authentication, `reverse_lazy` for URL management, and Django’s ORM for database interactions.
-- **Accessibility (ARIA):** Uses ARIA roles and live regions (`aria-live="polite"`) to ensure screen reader users receive real-time feedback.
+With BMS, visually impaired users can:
 
----
-
-## Core Features
-
-- Secure, login-protected business dashboard  
-- Product and folder management  
-- Drag-and-drop organization interface  
-- Reusable templates for product descriptions  
-- Automatic QR code generation  
-- Directional audio QR scanner designed for blind users  
+- Access information **independently** without needing assistance
+- Understand products, menus, and public information **in real time**
+- Avoid the frustration of navigating complex or inaccessible interfaces
+- Feel more **confident and included** in everyday environments
 
 ---
 
-## Summary
+## Key Features
 
-This project demonstrates how thoughtful design and strong technical implementation can work together to remove real-world accessibility barriers. By prioritizing an audio-first experience and leveraging modern web technologies, the application provides a practical and inclusive solution for visually impaired users.
+- Secure, login-protected business dashboard
+- Product and folder management with drag-and-drop organization
+- Reusable description templates
+- Automatic QR code generation
+- **Directional Audio QR Scanner** — an audio beacon that guides users to QR codes
+
+### Directional Audio Scanner
+
+The scanner uses spatial audio to guide users to a QR code before they scan it:
+
+- A beep plays when a QR code is detected
+- Sound shifts **left or right** based on the QR code's direction
+- Beep **speed increases** as users get closer to the code
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Django (MVT architecture) |
+| Frontend | Modern JavaScript (ES6 classes) |
+| Audio System | Web Audio API (real-time spatial sound) |
+| Database | Django ORM with migrations |
+| Accessibility | ARIA roles and live regions |
+
+---
+
+## Quick Start
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/AaritKumar/blindmanagementsystem
+cd accessible-qr-audio
+```
+
+### 2. Set up a virtual environment
+
+```bash
+python -m venv venv
+
+# Mac/Linux
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Run migrations
+
+```bash
+python manage.py migrate
+```
+
+### 5. Start the server
+
+```bash
+python manage.py runserver
+```
+
+### 6. Open the app
+
+Navigate to: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+---
+
+## How It Works
+
+**For Businesses:**
+1. Log in to the secure dashboard
+2. Create products and add spoken descriptions
+3. Generate QR codes
+4. Organize codes into folders for different use cases
+
+**For Users:**
+1. Open the BMS scanner
+2. Use the audio beacon to locate and scan a QR code
+3. Hear the audio description automatically
+
+---
+
+## Design Philosophy
+
+> *Accessibility is not a feature — it's the foundation.*
+
+BMS was not built by adapting a visual system. It was designed **from the ground up** to work without relying on sight.
+
+---
+
+## Screenshots
+
+**Dashboard**
+
+![Dashboard view](screenshot-dashboard.png)
+
+**QR Generation**
+
+![QR generation view](screenshot-create.png)
+
+---
+
+## Demo
+
+[Link to demo video]
+
+---
+
+## License
+
+[Add license here]
