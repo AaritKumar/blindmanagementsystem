@@ -1,10 +1,7 @@
 from django.contrib import admin
-from .models import Product, QRCode, Folder, Template
+from django.utils.html import mark_safe
+from .models import Folder, Product, QRCode, Template
 
-# Architectural Decision:
-# The Django admin is a powerful tool for internal data management. By registering the models,
-# we get a full-featured CRUD interface for free. The `QRCodeInline` allows for the management
-# of QR codes directly within the product admin page, which is a more intuitive workflow.
 
 class QRCodeInline(admin.StackedInline):
     model = QRCode
@@ -14,9 +11,8 @@ class QRCodeInline(admin.StackedInline):
     readonly_fields = ('image_tag',)
 
     def image_tag(self, instance):
-        from django.utils.html import mark_safe
-        if instance.image:
-            return mark_safe(f'<img src="{instance.image.url}" width="150" height="150" />')
+        if instance.image_data:
+            return mark_safe(f'<img src="{instance.image_data}" width="150" height="150" />')
         return ""
     image_tag.short_description = 'QR Code Image'
 
@@ -34,9 +30,8 @@ class QRCodeAdmin(admin.ModelAdmin):
     readonly_fields = ('image_tag',)
 
     def image_tag(self, instance):
-        from django.utils.html import mark_safe
-        if instance.image:
-            return mark_safe(f'<img src="{instance.image.url}" width="150" height="150" />')
+        if instance.image_data:
+            return mark_safe(f'<img src="{instance.image_data}" width="150" height="150" />')
         return ""
     image_tag.short_description = 'QR Code Image'
 
