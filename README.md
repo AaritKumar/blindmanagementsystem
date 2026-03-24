@@ -39,7 +39,7 @@ The directional audio scanner is an audio beacon that guides users to the QR cod
 
 ```bash
 git clone https://github.com/AaritKumar/blindmanagementsystem
-cd accessible-qr-audio
+cd blindmanagementsystem
 ```
 
 2. Set up environment
@@ -122,9 +122,8 @@ Users:
 
 The project was built with a fundamental principle:
 
-> Accessibility is not a feature, it's the foundation.
+> BMS should be more than a software, it should be a lifestyle.
 
-When developing BMS, we focused on not adapting a visual system. Instead, we designed it from the ground up to work without relying on sight.
 
 ## Summary
 
