@@ -84,7 +84,7 @@ Go to: http://127.0.0.1:8000/
 
 ## Demo
 
-[Link to demo video]
+https://youtu.be/4MHqxNg6T98
 
 ## How It Works
 
