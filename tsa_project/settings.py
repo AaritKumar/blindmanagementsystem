@@ -2,7 +2,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'your-super-secret-key'
+SECRET_KEY = 'dev-local-only-key-08415c'
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']

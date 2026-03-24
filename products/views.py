@@ -4,14 +4,15 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                UpdateView)
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from .models import Folder, Product, QRCode, Template
 
+
+# Page routes
 
 def home(request):
     return render(request, 'products/home.html')
@@ -20,6 +21,8 @@ def home(request):
 def scan_beacon(request):
     return render(request, 'products/scan.html')
 
+
+# Dashboard and product views
 
 class DashboardView(LoginRequiredMixin, ListView):
     model = Product
@@ -31,10 +34,12 @@ class DashboardView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({
-            'folders': Folder.objects.filter(owner=self.request.user).order_by('name'),
-            'templates': Template.objects.all().order_by('name')
-        })
+        context.update(
+            {
+                'folders': Folder.objects.filter(owner=self.request.user).order_by('name'),
+                'templates': Template.objects.all().order_by('name'),
+            }
+        )
         return context
 
 
@@ -50,27 +55,29 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
             decoded_text = codecs.decode(raw_description, 'unicode_escape')
         except (UnicodeDecodeError, TypeError):
             decoded_text = raw_description
-        form.instance.text_description = decoded_text
 
+        form.instance.text_description = decoded_text
         form.instance.owner = self.request.user
+
         response = super().form_valid(form)
-        
         qr_code = QRCode.objects.create(linked_product=self.object)
 
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({
-                'status': 'ok',
-                'product': {
-                    'pk': self.object.pk,
-                    'name': self.object.name,
-                    'text_description': self.object.text_description,
-                    'image_data': qr_code.image_data,
-                    'filename': qr_code.get_filename(),
-                    'edit_url': reverse_lazy('product_edit', kwargs={'pk': self.object.pk}),
-                    'delete_url': reverse_lazy('product_delete', kwargs={'pk': self.object.pk}),
+            return JsonResponse(
+                {
+                    'status': 'ok',
+                    'product': {
+                        'pk': self.object.pk,
+                        'name': self.object.name,
+                        'text_description': self.object.text_description,
+                        'image_data': qr_code.image_data,
+                        'filename': qr_code.get_filename(),
+                        'edit_url': reverse_lazy('product_edit', kwargs={'pk': self.object.pk}),
+                        'delete_url': reverse_lazy('product_delete', kwargs={'pk': self.object.pk}),
+                    },
                 }
-            })
-            
+            )
+
         return response
 
 
@@ -94,6 +101,8 @@ class ProductListenView(DetailView):
     slug_url_kwarg = 'unique_slug'
 
 
+# Folder views
+
 class FolderCreateView(LoginRequiredMixin, CreateView):
     model = Folder
     fields = ['name']
@@ -102,16 +111,20 @@ class FolderCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.owner = self.request.user
         super().form_valid(form)
+
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({
-                'status': 'ok',
-                'folder': {
-                    'pk': self.object.pk,
-                    'name': self.object.name,
-                    'edit_url': reverse_lazy('folder_edit', kwargs={'pk': self.object.pk}),
-                    'delete_url': reverse_lazy('folder_delete', kwargs={'pk': self.object.pk})
+            return JsonResponse(
+                {
+                    'status': 'ok',
+                    'folder': {
+                        'pk': self.object.pk,
+                        'name': self.object.name,
+                        'edit_url': reverse_lazy('folder_edit', kwargs={'pk': self.object.pk}),
+                        'delete_url': reverse_lazy('folder_delete', kwargs={'pk': self.object.pk}),
+                    },
                 }
-            })
+            )
+
         return redirect(self.get_success_url())
 
 
@@ -131,18 +144,24 @@ class FolderDeleteView(LoginRequiredMixin, DeleteView):
         return super().form_valid(form)
 
 
+# Template views
+
 class TemplateCreateView(LoginRequiredMixin, CreateView):
     model = Template
     fields = ['name', 'content']
-    
+
     def form_valid(self, form):
         response = super().form_valid(form)
+
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({
-                'status': 'ok',
-                'name': self.object.name,
-                'url': reverse_lazy('use_template', kwargs={'template_id': self.object.pk})
-            })
+            return JsonResponse(
+                {
+                    'status': 'ok',
+                    'name': self.object.name,
+                    'url': reverse_lazy('use_template', kwargs={'template_id': self.object.pk}),
+                }
+            )
+
         return response
 
     def get_success_url(self):
@@ -154,6 +173,8 @@ def use_template(request, template_id):
     return render(request, 'products/use_template.html', {'template': template})
 
 
+# Update folder when card is moved
+
 @login_required
 @require_POST
 def update_product_folder(request):
@@ -161,13 +182,13 @@ def update_product_folder(request):
         data = json.loads(request.body)
         product_id = data.get('product_id')
         folder_id = data.get('folder_id')
-        
+
         product = Product.objects.get(id=product_id, owner=request.user)
-        
+
         product.folder = None
         if folder_id:
             product.folder = Folder.objects.get(id=folder_id, owner=request.user)
-            
+
         product.save()
         return JsonResponse({'status': 'ok'})
     except Exception as e:

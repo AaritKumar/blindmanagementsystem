@@ -8,27 +8,28 @@
 {% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <h2>Create Your Account</h2>
-    <p>Get started with just a few details.</p>
-    
-    <form method="post" class="auth-form">
-        {% csrf_token %}
-        
-        {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}
-                    <div class="error-message">{{ field.errors.as_text }}</div>
-                {% endif %}
-            </div>
-        {% endfor %}
-        
-        <button type="submit" class="btn">Sign Up</button>
-    </form>
-    <div class="auth-links">
-        <p>Already have an account? <a href="{% url 'login' %}">Log In</a></p>
+    <div class="auth-container">
+        <h2>Create Your Account</h2>
+        <p>Get started with just a few details.</p>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="error-message">{{ field.errors.as_text }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn">Sign Up</button>
+        </form>
+
+        <div class="auth-links">
+            <p>Already have an account? <a href="{% url 'login' %}">Log In</a></p>
+        </div>
     </div>
-</div>
 {% endblock %}

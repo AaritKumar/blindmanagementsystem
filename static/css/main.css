@@ -90,7 +90,7 @@ h1, h2, h3 {
 }
 
 .btn:hover {
-    background-color: #e59071; /* Darker tangerine */
+    background-color: #e59071; /* a little darker */
 }
 
 .btn-secondary {
@@ -99,7 +99,7 @@ h1, h2, h3 {
 }
 
 .btn-secondary:hover {
-    background-color: #063a52; /* Darker blue */
+    background-color: #063a52; /* a little darker */
 }
 
 .btn-link {
@@ -116,6 +116,10 @@ h1, h2, h3 {
 
 .btn-link:hover {
     color: var(--tangerine-dream);
+}
+
+.inline-form {
+    display: inline;
 }
 
 .skip-link {
