@@ -65,8 +65,8 @@ class QRCode(models.Model):
         return f"{slugify(self.linked_product.name)}.png"
 
     def save(self, *args, **kwargs):
-        protocol = 'https' if not settings.DEBUG else 'http'
-        domain = Site.objects.get_current().domain
+        protocol = 'http'
+        domain = '127.0.0.1:8000'
         self.public_url = f"{protocol}://{domain}/listen/{self.linked_product.unique_slug}/"
         
         if not self.image_data:

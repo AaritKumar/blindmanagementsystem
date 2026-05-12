@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function () {
             error.style.display = message ? 'block' : 'none';
         }
 
-        // Filter template list
+        // Template Searchbar Functionality
         initTemplateSearch() {
             const searchInput = document.getElementById('template-search');
             const templateList = document.getElementById('template-list');
