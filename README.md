@@ -18,13 +18,10 @@ With the Blind Management System, visually impaired individuals no longer need t
 
 This allows users to:
 
-* Access information independently without needing assistance
-
-* Understand products, menus, and public information in real time
-
-* Avoid the frustration of navigating complex or inaccessible interfaces
-
-* Feel more confident and included in everyday environments
+- Access information independently without needing assistance
+- Understand products, menus, and public information in real time
+- Avoid the frustration of navigating complex or inaccessible interfaces
+- Feel more confident and included in everyday environments
 
 BMS replaces the increasing dependency on visual elements with direct audio output and offers visually impaired people access to information previously unavailable.
 
@@ -32,133 +29,102 @@ BMS replaces the increasing dependency on visual elements with direct audio outp
 
 The directional audio scanner is an audio beacon that guides users to the QR code:
 
-* When the QR code is detected, a beep is played
+- When the QR code is detected, a beep is played
+- Sound shifts to the left or right based on the direction of the QR code
+- Beep speed increases as users get closer to the QR code
 
-* Sound shifts to the left or right based on the direction of the QR code
-
-* Beep speed increases as users get closer to the QR code
-
-The beacon is built entirely on the Web Audio API — no native app, no external SDK. Each beep uses an `OscillatorNode` routed through a `StereoPannerNode` and `GainNode`. Pan value is calculated from the QR code's horizontal center position in the camera frame (-1 = full left, +1 = full right). Beep interval scales non-linearly with distance using a squared proximity term so the beeping stays manageable far away and drops sharply as the code fills the frame. Amplitude uses `exponentialRampToValueAtTime` instead of linear ramping to avoid the click artifact that occurs when gain drops abruptly to zero.
+The beacon is built entirely on the Web Audio API with no native app and no external SDK. Each beep uses an `OscillatorNode` routed through a `StereoPannerNode` and `GainNode`. Pan value is calculated from the QR code's horizontal center position in the camera frame (-1 = full left, +1 = full right). Beep interval scales non-linearly with distance using a squared proximity term so the beeping stays manageable far away and drops sharply as the code fills the frame. Amplitude uses `exponentialRampToValueAtTime` instead of linear ramping to avoid the click artifact that occurs when gain drops abruptly to zero.
 
 ## Quick Start
 
 1. Clone the repository
 
 ```bash
-
-git clone [https://github.com/AaritKumar/blindmanagementsystem](https://github.com/AaritKumar/blindmanagementsystem)
-
+git clone https://github.com/AaritKumar/blindmanagementsystem
 cd blindmanagementsystem
-
 ```
 
 2. Set up environment
 
 ```bash
-
 python -m venv venv
-
 source venv/bin/activate  # Mac/Linux
-
-venv\Scripts\activate     # Windows
-
+venv\Scripts\activate  # Windows
 ```
 
 3. Install dependencies
 
 ```bash
-
 pip install -r requirements.txt
-
 ```
 
 4. Run migrations
 
 ```bash
-
-python [manage.py](http://manage.py) migrate
-
+python manage.py migrate
 ```
 
 5. Run tests
 
 ```bash
-
-python [manage.py](http://manage.py) test
-
+python manage.py test
 ```
 
 6. Start the server
 
 ```bash
-
-python [manage.py](http://manage.py) runserver
-
+python manage.py runserver
 ```
 
 7. Open the app
 
-Go to: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+Go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
 
 ## Screenshots
 
-Dashboard view
+### Dashboard View
 
-![Dashboard view]
+![Dashboard view](screenshot-dashboard.png)
 
-QR generation
+### Create Product Form
 
-![QR generation]
+![Create product form](screenshot-create.png)
 
 ## Demo
 
-[https://youtu.be/4MHqxNg6T98](https://youtu.be/4MHqxNg6T98)
+[Watch the demo](https://youtu.be/4MHqxNg6T98)
 
 ## How It Works
 
 Businesses:
 
-* Create products on the business dashboard
-
-* Add descriptions of products onto the QR code
-
-* Generate QR codes
-
-* Organize QR codes for varying use cases
+- Create products on the business dashboard
+- Add descriptions of products onto the QR code
+- Generate QR codes
+- Organize QR codes for varying use cases
 
 Users:
 
-* Open the scanner
-
-* Use the audio beacon to identify and scan a QR code
-
-* Hear the audio description automatically
+- Open the scanner
+- Use the audio beacon to identify and scan a QR code
+- Hear the audio description automatically
 
 ## Core Features
 
-* Secure, login-protected dashboard
-
-* Product and folder management
-
-* Drag-and-drop organization
-
-* Reusable description templates
-
-* Automatic QR code generation
-
-* Directional audio QR scanner
+- Secure, login-protected dashboard
+- Product and folder management
+- Drag-and-drop organization
+- Reusable description templates
+- Automatic QR code generation
+- Directional audio QR scanner
 
 ## Technical Overview
 
-* Backend: Django (MVT architecture)
-
-* Frontend: Modern JavaScript (ES6 classes)
-
-* Audio System: Web Audio API (real-time spatial sound)
-
-* Database: Django ORM with migrations
-
-* Accessibility: ARIA roles and live regions
+- Backend: Django (MVT architecture)
+- Frontend: Modern JavaScript (ES6 classes)
+- Audio System: Web Audio API (real-time spatial sound)
+- Database: Django ORM with migrations
+- Accessibility: ARIA roles and live regions
 
 ### Why these technical decisions
 
@@ -174,120 +140,74 @@ Users:
 
 ### Development process
 
-The project was built across 40 commits on 6 branches following a requirements → design → implementation → testing workflow.
+The project was built across 40 commits on 6 branches following a requirements -> design -> implementation -> testing workflow.
 
-* `main` — stable releases
-
-* `feature/audio-beacon` — directional audio system
-
-* `feature/dashboard` — business dashboard and product management
-
-* `feature/templates` — reusable description template system
-
-* `feature/deployment` — deployment configuration
-
-* `feature/qr-base64` — migration from file-based to Base64 QR storage
+- `main` - stable releases
+- `feature/audio-beacon` - directional audio system
+- `feature/dashboard` - business dashboard and product management
+- `feature/templates` - reusable description template system
+- `feature/deployment` - deployment configuration
+- `feature/qr-base64` - migration from file-based to Base64 QR storage
 
 ## Testing
 
 ```bash
-
-python [manage.py](http://manage.py) test
-
+python manage.py test
 ```
 
 Tests cover the full development lifecycle across both apps:
 
 ```python
-
-# accounts/[tests.py](http://tests.py)
-
+# accounts/tests.py
 class SignupViewTest(TestCase):
-
     def test_signup_creates_user_and_redirects(self):
-
-        response = [self.client.post](http://self.client.post)('/accounts/signup/', {
-
+        response = self.client.post('/accounts/signup/', {
             'username': 'testuser', 'password': 'testpass123'
-
         })
-
         self.assertRedirects(response, '/dashboard/')
-
         self.assertTrue(User.objects.filter(username='testuser').exists())
 
-# products/[tests.py](http://tests.py)
-
+# products/tests.py
 class ProductModelTest(TestCase):
-
     def setUp(self):
-
         self.user = User.objects.create_user(username='u', password='p')
 
     def test_product_generates_unique_slug_on_save(self):
-
         product = Product.objects.create(
-
             owner=self.user, name='Test', text_description='desc'
-
         )
-
         self.assertNotEqual(product.unique_slug, '')
 
     def test_qrcode_auto_created_with_image_data(self):
-
         product = Product.objects.create(
-
             owner=self.user, name='Test', text_description='desc'
-
         )
-
         qr = QRCode.objects.create(linked_product=product)
-
         self.assertTrue(qr.image_data.startswith('data:image/png;base64,'))
 
     def test_listen_view_returns_200_for_valid_slug(self):
-
         product = Product.objects.create(
-
             owner=self.user, name='Test', text_description='desc'
-
         )
-
         response = self.client.get(f'/listen/{product.unique_slug}/')
-
         self.assertEqual(response.status_code, 200)
 
     def test_dashboard_requires_login(self):
-
         response = self.client.get('/dashboard/')
-
         self.assertRedirects(response, '/accounts/login/?next=/dashboard/')
 
     def test_update_product_folder_rejects_wrong_owner(self):
-
         other = User.objects.create_user(username='other', password='p')
-
         product = Product.objects.create(
-
             owner=other, name='Other product', text_description='desc'
-
         )
-
         self.client.login(username='u', password='p')
-
-        response = [self.client.post](http://self.client.post)(
-
+        response = self.client.post(
             '/api/update_product_folder/',
-
-            data=json.dumps({'product_id': [product.id](http://product.id), 'folder_id': None}),
-
+            data=json.dumps({'product_id': product.id, 'folder_id': None}),
             content_type='application/json'
-
         )
-
         self.assertEqual(response.status_code, 400)
-
 ```
 
 ## Design Philosophy
