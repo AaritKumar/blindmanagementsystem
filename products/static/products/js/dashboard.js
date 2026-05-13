@@ -144,7 +144,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Play text-to-speech previews
         initPreviewButtons() {
             document.getElementById('custom-preview-btn').addEventListener('click', () => {
-                const text = document.getElementById('id_text_description').value;
+                const form = document.getElementById('product-creation-form');
+                const text = form.querySelector('[name="text_description"]').value;
                 this.speak(text);
             });
 
@@ -316,8 +317,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             productForm.setAttribute('novalidate', true);
 
-            const nameInput = document.getElementById('id_name');
-            const descInput = document.getElementById('id_text_description');
+            const nameInput = productForm.querySelector('[name="name"]');
+            const descInput = productForm.querySelector('[name="text_description"]');
 
             this.updateCharCounter(nameInput, 200);
             this.updateCharCounter(descInput, 1000);
@@ -404,16 +405,14 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         }
 
-        // Create product in place
+        // Validate product creation before normal form submission
         initProductCreation() {
             const form = document.getElementById('product-creation-form');
             if (!form) return;
 
             form.addEventListener('submit', (event) => {
-                event.preventDefault();
-
-                const nameInput = document.getElementById('id_name');
-                const descInput = document.getElementById('id_text_description');
+                const nameInput = form.querySelector('[name="name"]');
+                const descInput = form.querySelector('[name="text_description"]');
                 let ok = true;
 
                 if (nameInput.value.trim() === '') {
@@ -426,28 +425,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     ok = false;
                 }
 
-                if (!ok) return;
-
-                const formData = new FormData(form);
-
-                fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': this.csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.status === 'ok') {
-                            this.addNewProductToDOM(data.product);
-                            form.reset();
-                            this.openTab('catalog');
-                        } else {
-                            alert('Could not create product.');
-                        }
-                    });
+                if (!ok) {
+                    event.preventDefault();
+                }
             });
         }
 

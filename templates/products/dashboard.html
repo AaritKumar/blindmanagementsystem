@@ -182,8 +182,8 @@
             <form id="folder-creation-form" method="post" action="{% url 'folder_create' %}">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="id_name">Folder Name:</label>
-                    <input type="text" name="name" id="id_name" required>
+                    <label for="id_folder_name">Folder Name:</label>
+                    <input type="text" name="name" id="id_folder_name" required>
                 </div>
                 <button type="submit" class="btn">Create Folder</button>
             </form>
